@@ -12,10 +12,19 @@ function setup() {
     // Import Class
     convex = new ConvexHull();
     convex.generatePoints(100, WIDTH, HEIGHT);
-    convex.showPoints();
+    convex.showPoints(convex.points);
 
-    edges = convex.slowConvexHull(convex.points);
-    convex.showEdges(edges);
+    // edges = convex.slowConvexHull(convex.points);
+    // convex.showEdges(edges);
+    // console.log(edges);
+    strokeWeight(20);
+    stroke(0, 255, 0);
+    hull = convex.jarvisAlgorithm(convex.points);
+    edges = convex.points2Edges(hull);
     console.log(edges)
-  }
+    convex.showEdges(edges);
+    
+    convex.showPoints(convex.points);
   
+
+  }
