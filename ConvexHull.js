@@ -123,153 +123,33 @@ class ConvexHull {
         return st;
     }
 
-    bridge(P, verticalLine) {
+    bridge(S, a) {
         let candidates = new Set();
-
-        if (P.length === 2) {
-            this.sleep(100);
-            if (P[0].x < P[1].x) {
-                return [P[0], P[1]];
-            } else {
-                return [P[1], P[0]];
-            }
-        }
-        let pairs = [];
-        
-
-        let modify = this.makeSet(P);
-        while (modify.size >= 2) {
-            let [r1] = modify;
-            modify.delete(r1);
-            let [r2] = modify;
-            modify.delete(r2);
-            let tmp = [r1, r2];
-            tmp.sort((a, b) => {
-                if (a.x !== b.x) {
-                    return a.x - b.x;
-                }
-                return a.y - b.y;
-            });
-            for(let t of tmp){
-                pairs.push(tmp);
-            }
+        if(S.length === 2){
+            let [i] = S;
+            S.delete(i);
+            let [j] = S;
+            S.delete(j);
+            if(i.x < j.x) return new Set([i, j]);
+            else return new Set([j, i]);
         }
 
-        if (modify.size === 1) {
-            let [first] = modify;
+        // Make S/2 disjoint sets
+        let disjointSubsets = new Set();
+        let s = this.deepCloneSet(S);
+        while(s.size > 1){
+            let [first] = s;
+            s.delete(first);
+            let [second] = s;
+            s.delete(second);
+            disjointSubsets.add([first, second]);
+        }
+        if(s.size === 1){
+            let [first] = s;
             candidates.add(first);
         }
 
-        let slopes = [];
-        pairs.forEach(p => {
-            let pi = p[0];
-            let pj = p[1];
-            if (pi.x === pj.x) {
-                let pairArray = [pi, pj];
-                pairs = removeItemOnce(pi);
-                pairs = removeItemOnce(pj);
-                if (pi.y > pj.y) {
-                    candidates.add(pi);
-                } else {
-                    candidates.add(pj);
-                }
-            } else {
-                let s = (pi.y - pj.y) / (pi.x - pj.x);
-                slopes.push(s);
-            }
-        });
-
         
-        // Check this
-        let medianIdx = Math.floor(slopes.length / 2);
-        if (slopes.length % 2 == 0) {
-            medianIdx -= 1;
-        }
-        // Replace with quickselect later
-        let medianSlope = this.findMedian(slopes);
-        let small = pairs.reduce((acc, pair, i) => {
-            if (slopes[i] < medianSlope) {
-                acc.add(pair);
-            }
-            return acc;
-        }, new Set());
-
-        let equal = pairs.reduce((acc, pair, i) => {
-            if (slopes[i] === medianSlope) {
-                acc.add(pair);
-            }
-            return acc;
-        }, new Set());
-
-        let large = pairs.reduce((acc, pair, i) => {
-            if (slopes[i] > medianSlope) {
-                acc.add(pair);
-            }
-            return acc;
-        }, new Set());
-
-        let maxSlope = -Infinity;
-        
-        for (let p of P) {
-            let s = p.y - medianSlope * p.x;
-            if (maxSlope < s) maxSlope = s;
-        }
-
-        let maxSet = new Set();
-        for (let p of P) {
-            if (p.y - medianSlope * p.x === maxSlope) {
-                maxSet.add(p);
-            }
-        }
-        
-        let maxArray = Array.from(maxSet);
-
-
-
-        let left = maxArray[0];
-        let right = maxArray[0];
-
-        for(let point of maxArray){
-            if(left.x > point.x) left = point;
-            else if(left.x === point.x && left.y > point.y){
-                left = point;
-            }
-            if(right.x < point.x) right = point;
-            else if(right.x === point.x && right.y < point.y){
-                right = point;
-            }
-        }
-
-        if (left.x <= verticalLine && right.x > verticalLine) {
-            return [left, right];
-        }
-
-
-        if (right.x <= verticalLine) {
-            large.forEach(pair => {
-                candidates.add(pair[1]);
-            });
-            equal.forEach(pair => {
-                candidates.add(pair[1]);
-            });
-            small.forEach(pair => {
-                candidates.add(pair[1]);
-            });
-        }
-
-        if (left.x > verticalLine) {
-            small.forEach(pair => {
-                candidates.add(pair[0]);
-            });
-            equal.forEach(pair => {
-                candidates.add(pair[0]);
-            });
-            large.forEach(pair => {
-                candidates.add(pair[0]);
-            });
-        }
-
-        return this.bridge([...candidates], verticalLine);
     }
 
     connect(k, m, S) {
