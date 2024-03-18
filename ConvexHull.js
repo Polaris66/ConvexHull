@@ -2,8 +2,7 @@ class ConvexHull {
 
     constructor() {
         this.points = [];
-        this.left;
-        this.right;
+        this.hull = [];
     }
 
     generatePoints(n, w, h) {
@@ -15,12 +14,12 @@ class ConvexHull {
             createVector(120.69221916765201, 96.68016953679835),
             createVector(124.16054907376757, 330.764053557565),
             createVector(142.01135788907902, 338.99091823753406),
-            createVector(313.5525735639671, 127.65974897591565),
+            createVector(313.5525735639671, 27.65974897591565),
             createVector(314.85005402405034, 240.21167187808607),
-            createVector(319.4072693378745, 196.27012795606436),
+            createVector(419.4072693378745, 196.27012795606436),
             createVector(360.08926879425513, 449.75512688006444),
-            createVector(390.9358853900112, 450.42540011701266),
-            createVector(505.45127045630545, 425.0332464782726)];
+            createVector(390.9358853900112, 50.42540011701266),
+            createVector(505.45127045630545, 125.0332464782726)];
         return;
     }
 
@@ -71,59 +70,49 @@ class ConvexHull {
         return medianPoint;
     }
 
-    mirror(P) {
-        let newP = []
-        for (let p of P) {
-            p.x *= -1;
-            p.y *= -1;
-            newP.push([p.x, p.y]);
-        }
-        return newP;
-    }
-
     KPS(P) {
-        let upper = this.UpperHull(P);
-        let lower = this.mirror(this.UpperHull(this.mirror(P)));
+        let upper = this.UpperHull(this.makeSet(P));
+        let lower = this.LowerHull((this.makeSet(P)));
         return [...upper, ...lower];
     }
 
     UpperHull(P) {
-        console.log("===Upper Hull Points")
-        console.log(P);
-        console.log("==End Upper")
-        let pmin = P[0];
-        let pmax = P[0];
-        for (let i = 1; i < P.length; i++) {
-            if (P[i].x < pmin.x || (P[i].x == pmin.x)) {
-                pmin = P[i];
-            }
-            if (P[i].x > pmax.x || (P[i].x == pmax.x)) {
-                pmax = P[i];
-            }
+        let [min] = P;
+        let [max] = P; 
+        for(let point of P){
+            if(point.x < min.x) min = point;
+            else if(point.x == min.x && point.y > min.y) min = point;
+            if(point.x > min.x) min = point;
+            else if(point.x == min.x && point.y > min.y) min = point;
+        }
+        console.log(min);
+        console.log(max);
+        if(min === max){
+            this.hull.push(min);
         }
 
-        let pumin = pmin;
-        let pumax = pmax;
-        for (let i = 0; i < P.length; i++) {
-            if (P[i].x == pmin.x && P[i].y > pumin.y) {
-                pumin = P[i];
-            }
-            if (P[i].x == pmax.x && P[i].y > pumax.y) {
-                pumax = P[i];
-            }
-        }
-        return this.connect(pumin, pumax, P);
+        let T = this.deepCloneSet(P);
+        
+        return this.connect(min, max, T);
     }
 
-    findMedian(a) {
-        let sortedArray = a.slice();
-        let n = sortedArray.length;
-        
-        sortedArray.sort((a, b) => a - b);
-        
-        if (n % 2 !== 0)
-            return sortedArray[Math.floor(n / 2)];
-        return (sortedArray[Math.floor((n - 1) / 2)] + sortedArray[Math.floor(n / 2)]) / 2;
+    deepCloneSet(S){
+        let s = new Set();
+        for(let point of S){
+            s.add(point);
+        }
+        return s;
+    }
+
+    medianXOfSet(s) {
+        let x = [];
+        for(let point of s){
+            x.push(point.x);
+        }
+        const sortedX = x.sort((a, b) => a - b);
+        const medianIdx = Math.floor(sortedX.length / 2);
+        const median = sortedX.length % 2 === 0 ? (sortedX[medianIdx - 1] + sortedX[medianIdx]) / 2 : sortedX[medianIdx];
+        return median;
     }
 
     makeSet(arr){
@@ -283,26 +272,20 @@ class ConvexHull {
         return this.bridge([...candidates], verticalLine);
     }
 
-    connect(lower, upper, P) {
-        
-        console.log("===Connect Points, lower, upper")
-        console.log(P);
-        console.log(lower);
-        console.log(upper);
-        console.log("==fgh")
-
-        if (lower === upper) return [lower];
-
-        let [left, right] = this.bridge(P, this.findMedianOfPairs(P).x);     
-        let pointsLeft = [];
-        let pointsRight = [];
-        for(let p of P){
-
-            if(p.x < left.x) pointsLeft.push(p);
-            if(p.x > right.x) pointsRight.push(p);
+    connect(k, m, S) {
+        let a = this.medianXOfSet(S);
+        let [pi, pj] = this.bridge(S, a);
+        let sLeft = new Set();
+        let sRight = new Set();
+        for(let point of S){
+            if(point.x < S[pi].x) sLeft.add(point);
+            if(point.x > S[pj].x) sRight.add(point);
         }
+        if(pi === k) this.hull.push(pi);
+        else this.connect(k, pi, sLeft);
 
-        return [...this.connect(lower, left, pointsLeft), ...this.connect(right, upper, pointsRight)]
+        if(pj === m) this.hull.push(pj);
+        else this.connect(pj, m, sRight);
     }
 
     sleep(ms) {
