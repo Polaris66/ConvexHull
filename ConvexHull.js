@@ -9,29 +9,291 @@ class ConvexHull {
         for (let i = 0; i < n; i++) {
             this.points.push(createVector(w / 8 + random() * (3 * w / 4), h / 8 + random() * (3 * h / 4)));
         }
-        this.points = [
-            createVector(117.26619935034265, 389.0061390155947),
-            createVector(120.69221916765201, 96.68016953679835),
-            createVector(124.16054907376757, 330.764053557565),
-            createVector(142.01135788907902, 338.99091823753406),
-            createVector(313.5525735639671, 27.65974897591565),
-            createVector(314.85005402405034, 240.21167187808607),
-            createVector(419.4072693378745, 196.27012795606436),
-            createVector(360.08926879425513, 449.75512688006444),
-            createVector(390.9358853900112, 50.42540011701266),
-            createVector(505.45127045630545, 125.0332464782726)];
+        this.showPoints(this.points);
         return;
     }
 
+    // Slow Convex Hull
+
+    slowConvexHull(P) {
+        let E = [];
+        for (let p of P) {
+            for (let q of P) {
+                if (p != q) {
+                    let valid = true;
+                    for (let r of P) {
+                        if (r != p && r != q) {
+                            if (
+                                (q.x - p.x) * (r.y - p.y) -
+                                (q.y - p.y) * (r.x - p.x) >
+                                0
+                            ) {
+                                valid = false;
+                            }
+                        }
+                    }
+                    if (valid) {
+                        E.push([p, q]);
+                    }
+                }
+            }
+        }
+        return E;
+    }
+
+    // Jarvis
     
+    jarvisAlgorithm(P) {
+        let hull = [];
+
+        let n = P.length;
+        let p0 = 0;
+        for (let i = 1; i < n; i++) {
+            if (P[i].x < P[p0].x) {
+                p0 = i;
+            }
+        }
+        let p = p0;
+        let q;
+        do {
+            hull.push(P[p]);
+
+            q = (p + 1) % n;
+
+            for (let i = 0; i < n; i++) {
+                if (this.orientation(P[p], P[i], P[q])) {
+                    q = i;
+                }
+            }
+
+            p = q;
+        }
+        while (p != p0);
+
+        return hull;
+    }    
+    
+    orientation(p1, p2, p3) {
+        let val = (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y);
+
+        return (val > 0); // clockwise or anti clockwise
+    }
+
+    // Code for showing
+    showEdges(E) {
+        for (let e of E) {
+            line(e[0].x, e[0].y, e[1].x, e[1].y);
+        }
+    }
 
     showPoints() {
         this.points.forEach((p) => {
-            point(p.x, p.y);
+            point(p);
         });
     }
 
 
+    points2Edges(P) {
+        let E = [];
+        let n = P.length;
+        for (let i = 0; i < n; i++) {
+            E.push([P[i], P[(i + 1) % n]]);
+        }
+        return E;
+    }
+
+    // KPS
+
+    KPS(P) {
+        let upper = this.UpperHull(P);
+        console.log(upper);
+        return upper;
+    }
+
+    UpperHull(P) {
+        let pmin = P[0];
+        let pmax = P[0];
+        for(let point of P){
+            if(point.x < pmin.x) pmin = point;
+            else if((point.x == pmin.x) && (point.y > pmin.y)) pmin = point;
+            if(point.x > pmax.x) pmax = point;
+            else if((point.x == pmax.x) && (point.y > pmax.y)) pmax = point;
+        }
+        if(pmin.equals(pmax)){
+            return pmin;
+        }
+
+        let T = [pmin, pmax];
+        for(let p of P){
+            if((p.x > pmin.x) && (p.x < pmax.x)){
+                T.push(p);
+            }
+        }
+        return this.connect(pmin, pmax, T);
+    }
+
+    connect(k, m, S) {
+        let a = this.findMedian(S);
+        stroke(255,0,0)
+        line(a, 0, a, 600);
+        stroke(0,255,0)
+        
+        let [pi, pj] = this.bridge(S, a);
+        line(pi.x, pi.y, pj.x, pj.y);
+
+        let sLeft = [pi];
+        let sRight = [pj];
+        for(let point of S){
+            if(point.x < pi.x) sLeft.push(point);
+            if(point.x > pj.x) sRight.push(point);
+        }
+        
+        let hull = [];
+        if(pi.equals(k)){
+            hull.push(pi);
+        }    
+        else{ 
+            hull.concat(this.connect(k, pi, sLeft));
+        }
+        
+        if(pj.equals(m)) {
+            hull.push(pj)
+        }
+        else {
+            hull.concat(this.connect(pj, m, sRight));
+        }
+
+        return hull;
+    }
+    findMedian(S){
+        S.sort((a, b) => a.x - b.x);
+        let k = S[0];
+        let mid = Math.floor(S.length / 2);
+        if(S.length%2 === 0){
+            k = (S[mid-1].x + S[mid].x)/2;
+        } else {
+            k = S[mid].x;
+        }
+        return k;
+    }
+
+    bridge(S, a) {
+        if(S.length === 2){
+            if(S[0].x < S[1].x){
+                return [S[0], S[1]];
+            }
+            else{
+                return [S[1], S[0]];
+            }
+        }
+
+        let candidates = [];
+        let disjointSubsets = [];
+
+        for(let i = 0; i < S.length-1; i+=2){
+            disjointSubsets.push([S[i], S[i+1]]);
+        }
+
+        if(S.length % 2 === 1){
+            candidates.push(S[S.length - 1]);
+        }
+        
+        let pairs = disjointSubsets.map(([a,b]) => {   
+            if(a.x > b.x){
+                return [b,a];
+            } else {
+                return [a, b];
+            }
+        });
+        
+        let newPairs = [];
+        for(let point of pairs){
+            let [pi, pj] = point;
+            if(pi.x === pj.x){
+                if(pi.y > pj.y) candidates.push(pi);
+                else candidates.push(pj);
+            } else {
+                let s = (pi.y - pj.y)/(pi.x - pj.x);
+                newPairs.push([pi, pj, s]);
+            }  
+        }
+
+        if(newPairs.length === 0) return candidates;
+
+
+        // Find median of the slopes
+        let k;
+        newPairs.sort((a, b) => a[2] - b[2]);
+        // console.log(newPairs);
+        let mid = Math.floor(newPairs.length / 2);
+
+        
+
+        if(newPairs.length%2 === 0){
+            k = (newPairs[mid-1][2] + newPairs[mid][2])/2;
+        } else {
+            k = newPairs[mid][2];
+        }
+
+        let small = newPairs.filter((p) => {
+            return p[2] < k;
+        });
+        let equal = newPairs.filter((p) => {
+            return p[2] === k;
+        });
+        let large = newPairs.filter((p) => {
+            return p[2] > k;
+        });
+
+        let pk = S[0];
+        let pm = S[0];
+        for(let point of S){
+            
+            if((point.y - k*point.x) > (pk.y - k*pk.x)){
+                pk = point;
+            } else if((point.y - k*point.x) === ((pk.y - k*pk.x) && (point.x < pk.x))){
+                pk = point;
+            }
+
+            if((point.y - k*point.x) > (pk.y - k*pm.x)){
+                pm = point;
+            } else if(((point.y - k*point.x) === (pk.y - k*pm.x))&& (point.x > pm.x)){
+                pm = point; 
+            }
+        }
+        if((pk.x <= a) && (pm.x > a)) return [pk,pm];
+        
+        if(pm.x <= a){
+            for(let [pi, pj, _] of large){
+                candidates.push(pj);
+            }
+            for(let [pi, pj, _] of equal){
+                candidates.push(pj);
+            }
+            for(let [pi, pj, _] of small){
+                candidates.push(pi);
+                candidates.push(pj);
+            }
+        }
+
+        if(pk.x > a){
+            for(let [pi, pj, _] of small){
+                candidates.push(pi);
+            }
+            for(let [pi, pj, _] of equal){
+                candidates.push(pi);
+            }
+            for(let [pi, pj, _] of large){
+                candidates.push(pi);
+                candidates.push(pj);
+            }
+
+        }
+        return this.bridge(candidates, a);
+    }
+
+
+    
     partition(arr, left, right, pivotIndex) {
         const pivotValue = arr[pivotIndex].x;
         [arr[pivotIndex], arr[right]] = [arr[right], arr[pivotIndex]];
@@ -70,170 +332,25 @@ class ConvexHull {
         return medianPoint;
     }
 
-    KPS(P) {
-        let upper = this.UpperHull(this.makeSet(P));
-        let lower = this.LowerHull((this.makeSet(P)));
-        return [...upper, ...lower];
-    }
-
-    UpperHull(P) {
-        let [min] = P;
-        let [max] = P; 
-        for(let point of P){
-            if(point.x < min.x) min = point;
-            else if(point.x == min.x && point.y > min.y) min = point;
-            if(point.x > min.x) min = point;
-            else if(point.x == min.x && point.y > min.y) min = point;
-        }
-        console.log(min);
-        console.log(max);
-        if(min === max){
-            this.hull.push(min);
-        }
-
-        let T = this.deepCloneSet(P);
-        
-        return this.connect(min, max, T);
-    }
-
-    deepCloneSet(S){
-        let s = new Set();
-        for(let point of S){
-            s.add(point);
-        }
-        return s;
-    }
-
-    medianXOfSet(s) {
-        let x = [];
-        for(let point of s){
-            x.push(point.x);
-        }
-        const sortedX = x.sort((a, b) => a - b);
-        const medianIdx = Math.floor(sortedX.length / 2);
-        const median = sortedX.length % 2 === 0 ? (sortedX[medianIdx - 1] + sortedX[medianIdx]) / 2 : sortedX[medianIdx];
-        return median;
-    }
-
-    makeSet(arr){
-        let st = new Set();
-        for(let a of arr){
-            st.add(a);
-        }
-        return st;
-    }
-
-    bridge(S, a) {
-        let candidates = new Set();
-        if(S.length === 2){
-            let [i] = S;
-            S.delete(i);
-            let [j] = S;
-            S.delete(j);
-            if(i.x < j.x) return new Set([i, j]);
-            else return new Set([j, i]);
-        }
-
-        // Make S/2 disjoint sets
-        let disjointSubsets = new Set();
-        let s = this.deepCloneSet(S);
-        while(s.size > 1){
-            let [first] = s;
-            s.delete(first);
-            let [second] = s;
-            s.delete(second);
-            disjointSubsets.add([first, second]);
-        }
-        if(s.size === 1){
-            let [first] = s;
-            candidates.add(first);
-        }
-
-        
-    }
-
-    connect(k, m, S) {
-        let a = this.medianXOfSet(S);
-        let [pi, pj] = this.bridge(S, a);
-        let sLeft = new Set();
-        let sRight = new Set();
-        for(let point of S){
-            if(point.x < S[pi].x) sLeft.add(point);
-            if(point.x > S[pj].x) sRight.add(point);
-        }
-        if(pi === k) this.hull.push(pi);
-        else this.connect(k, pi, sLeft);
-
-        if(pj === m) this.hull.push(pj);
-        else this.connect(pj, m, sRight);
-    }
-
-    sleep(ms) {
-        return new Promise(r => setTimeout(r, ms));
-    }
-
-
-    // left of a line
-    isLeftOfLine(point, p1, p2) {
-        let crossProduct = (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
-        return crossProduct > 0;
-    }
-
-    // right of a line
-    isRightOfLine(point, p1, p2) {
-        let crossProduct = (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
-        return crossProduct < 0;
-    }
-
-
-    slowConvexHull(P) {
-        P = Array.from(P);
-        let E = new Set([]);
+    mirror(P) {
+        let newP = []
         for (let p of P) {
-            for (let q of P) {
-                if (p != q) {
-                    let valid = true;
-                    for (let r of P) {
-                        if (r != p && r != q) {
-                            if (
-                                (q.x - p.x) * (r.y - p.y) -
-                                (q.y - p.y) * (r.x - p.x) >
-                                0
-                            ) {
-                                valid = false;
-                            }
-                        }
-                    }
-                    if (valid) {
-                        E.add([p, q]);
-                    }
-                }
-            }
+            p.x *= -1;
+            p.y *= -1;
+            newP.push([p.x, p.y]);
         }
-        return E;
+        return newP;
     }
 
-    showEdges(E) {
-        E = Array.from(E);
-        for (let e of E) {
-            line(e[0].x, e[0].y, e[1].x, e[1].y);
-        }
-    }
-}
+    // // left of a line
+    // isLeftOfLine(point, p1, p2) {
+    //     let crossProduct = (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
+    //     return crossProduct > 0;
+    // }
 
-function getRndmFromSet(set) {
-    var rndm = Math.floor(Math.random() * set.length);
-    return set[rndm];
+    // // right of a line
+    // isRightOfLine(point, p1, p2) {
+    //     let crossProduct = (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
+    //     return crossProduct < 0;
+    // }
 }
-
-function getFirstItemOfSet(set) {
-    return [...set][0];
-}
-
-function removeItemOnce(arr, value) {
-    var index = arr.indexOf(value);
-    if (index > -1) {
-      arr.splice(index, 1);
-    }
-    return arr;
-  }
