@@ -6,21 +6,16 @@ function setup() {
 
   background(0);
   stroke(255);
-  strokeWeight(10);
+  strokeWeight(7);
 
   // Import Class
   let convex = new ConvexHull();
-  convex.generatePoints(10, WIDTH, HEIGHT);
+  convex.generatePoints(500, WIDTH, HEIGHT);
   convex.showPoints();
-
+  strokeWeight(5);
   let edges = convex.KPS(convex.points);
-  // console.log(edges);
-  // for (let edge of edges) {
-  //   stroke(255, 0, 0)
-  //   point(edge.x, edge.y)
-  // }
-  // stroke(255, 0, 0)
-  // point(edge.x, edge.y)
-  // convex.showEdges(edges);
-  // console.log(edges)
+  stroke(255, 0, 0)
+  for(let i = 0; i < edges.length - 1; i++){
+    line(edges[i].x, edges[i].y, edges[i+1].x, edges[i+1].y);
+  }
 }
