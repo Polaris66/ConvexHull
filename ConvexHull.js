@@ -4,6 +4,8 @@ class ConvexHull {
         this.points = [];
         this.hull = [];
         this.flag = false;
+        // We keep simulating by iterating through the instructions here
+        this.simulation = [];
     }
 
     generatePoints(n, w, h) {
@@ -160,8 +162,14 @@ class ConvexHull {
 
     connect(k, m, S) {
         let a = this.findMedian(S);
+        this.simulation.push([
+            TYPE.MEDIAN, a, k, m, this.deepClone(S)
+            ]);
         console.log(a);
         let [pi, pj] = this.bridge(S, a);
+        this.simulation.push([
+            TYPE.BRIDGE, a, k, m, this.deepClone(S), pi, pj, "The Bridge for these points..."
+            ]);
         console.log("back in connect");
         if (!this.flag || true) {
             this.flag = true;
@@ -173,17 +181,28 @@ class ConvexHull {
             }
 
             if (pi.equals(k)) {
+                this.simulation.push([
+                    TYPE.HULL_1_k, a, k, m, this.deepClone(S), pi, pj, "The left point of the Bridge must belong to the hull as it is equal to the left-most point..."
+                    ]);
                 this.hull.push(pi);
             } else {
+                this.simulation.push([
+                    TYPE.ELIMINATE_l, a, k, m, this.deepClone(sLeft), pi, pj, "We can eliminate all the points to the right of the left point of Bridge..."
+                    ]);
                 this.connect(k, pi, sLeft);
             }
             if (pj.equals(m)) {
+                this.simulation.push([
+                    TYPE.HULL_1_j, a, k, m, this.deepClone(S), pi, pj, "The right point of the Bridge must belong to the hull as it is equal to the right-most point..."
+                    ]);
                 this.hull.push(pj)
             } else {
+                this.simulation.push([
+                    TYPE.ELIMINATE_r, a, k, m, this.deepClone(sRight), pi, pj, "We can eliminate all the points to the left of the right point of the Bridge..."
+                    ]);
                 this.connect(pj, m, sRight);
             }
         }
-
         return;
     }
 
@@ -394,6 +413,14 @@ class ConvexHull {
         let res = []
         for (let p of P) {
             res.push(createVector(-1 * p.x, -1 * p.y));
+        }
+        return res;
+    }
+
+    deepClonePoints(P) {
+        let res = []
+        for (let p of P) {
+            res.push(createVector(p.x, p.y));
         }
         return res;
     }
