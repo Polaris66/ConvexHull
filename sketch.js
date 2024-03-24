@@ -1,7 +1,7 @@
 let WIDTH = 600;
 let HEIGHT = 600;
 let points = [];
-let n = 100;
+let n = 200;
 let generateButton;
 let clearButton;
 let randomlyInitializeButton;
@@ -114,7 +114,7 @@ function runSimulationStep() {
         strokeWeight(4);
         // Send Message
         sendMessage("Median (purple) of these points (green). The right-most and left-most points are in cyan.");
-        setTimeout(runSimulationStep, 3000); 
+        setTimeout(runSimulationStep, 1000); 
         break;
       case TYPE.BRIDGE:
         stroke(255, 0, 0);
@@ -123,54 +123,54 @@ function runSimulationStep() {
         } else {
           line(instruction[5].x, instruction[5].y, instruction[6].x, instruction[6].y);
         }
-        sendMessage(instruction[7]);
-        setTimeout(runSimulationStep, 3000); 
+        sendMessage("The Bridge for these points...");
+        setTimeout(runSimulationStep, 1000); 
         break;
       case TYPE.ELIMINATE_l:
         clearCanvas();
         // Draw Points
         if(instruction[4][0].x < 0){
+          sendMessage("We can eliminate all the points to the left of the right point of Bridge...");
           drawPoints(mirror(instruction[4]));
         } else {
+          sendMessage("We can eliminate all the points to the right of the left point of Bridge...");
           drawPoints(instruction[4]);
         }
-        sendMessage(instruction[7]);
-        setTimeout(runSimulationStep, 3000);
+        setTimeout(runSimulationStep, 1000);
         break;
       case TYPE.ELIMINATE_r:
         clearCanvas();
         if(instruction[4][0].x < 0){
           drawPoints(mirror(instruction[4]));
+          sendMessage("We can eliminate all the points to the right of the left point of the Bridge...");
         } else {
+          sendMessage("We can eliminate all the points to the left of the right point of the Bridge...");
           drawPoints(instruction[4]);
         }
-        sendMessage(instruction[7]);
-        setTimeout(runSimulationStep, 3000);
+        setTimeout(runSimulationStep, 1000);
         break;
       case TYPE.HULL_1_j:
-        clearCanvas();
         stroke(0, 255, 255);
         if(instruction[6].x < 0){
           line(-1*instruction[6].x, -1*instruction[6].y, -1*instruction[6].x, -1*instruction[6].y);
         } else {
           line(instruction[6].x, instruction[6].y, instruction[6].x, instruction[6].y);
         }
-        sendMessage(instruction[7]);
-        setTimeout(runSimulationStep, 3000); 
+        sendMessage("The right point of the Bridge must belong to the hull as it is equal to the right-most point...");
+        setTimeout(runSimulationStep, 1000); 
         break;
       case TYPE.HULL_1_k:
-        clearCanvas();
         stroke(0, 255, 255);
         if(instruction[5].x < 0){
           line(-1*instruction[5].x, -1*instruction[5].y, -1*instruction[5].x, -1*instruction[5].y);
         } else {
           line(instruction[5].x, instruction[5].y, instruction[5].x, instruction[5].y);
         }
-        sendMessage(instruction[7]);
-        setTimeout(runSimulationStep, 3000); 
+        sendMessage("The left point of the Bridge must belong to the hull as it is equal to the left-most point...");
+        setTimeout(runSimulationStep, 1000); 
         break;
       case TYPE.HULL_2:
-        setTimeout(runSimulationStep, 3000); 
+        setTimeout(runSimulationStep, 1000); 
         break;
       default:
         sendMessage("Simulation ended or not initialized.");

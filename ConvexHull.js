@@ -168,7 +168,7 @@ class ConvexHull {
         console.log(a);
         let [pi, pj] = this.bridge(S, a);
         this.simulation.push([
-            TYPE.BRIDGE, a, k, m, this.deepClone(S), pi, pj, "The Bridge for these points..."
+            TYPE.BRIDGE, a, k, m, this.deepClone(S), pi, pj
             ]);
         console.log("back in connect");
         if (!this.flag || true) {
@@ -182,23 +182,23 @@ class ConvexHull {
 
             if (pi.equals(k)) {
                 this.simulation.push([
-                    TYPE.HULL_1_k, a, k, m, this.deepClone(S), pi, pj, "The left point of the Bridge must belong to the hull as it is equal to the left-most point..."
+                    TYPE.HULL_1_k, a, k, m, this.deepClone(S), pi, pj
                     ]);
                 this.hull.push(pi);
             } else {
                 this.simulation.push([
-                    TYPE.ELIMINATE_l, a, k, m, this.deepClone(sLeft), pi, pj, "We can eliminate all the points to the right of the left point of Bridge..."
+                    TYPE.ELIMINATE_l, a, k, m, this.deepClone(sLeft), pi, pj
                     ]);
                 this.connect(k, pi, sLeft);
             }
             if (pj.equals(m)) {
                 this.simulation.push([
-                    TYPE.HULL_1_j, a, k, m, this.deepClone(S), pi, pj, "The right point of the Bridge must belong to the hull as it is equal to the right-most point..."
+                    TYPE.HULL_1_j, a, k, m, this.deepClone(S), pi, pj
                     ]);
                 this.hull.push(pj)
             } else {
                 this.simulation.push([
-                    TYPE.ELIMINATE_r, a, k, m, this.deepClone(sRight), pi, pj, "We can eliminate all the points to the left of the right point of the Bridge..."
+                    TYPE.ELIMINATE_r, a, k, m, this.deepClone(sRight), pi, pj
                     ]);
                 this.connect(pj, m, sRight);
             }
