@@ -73,7 +73,7 @@ class ConvexHull {
             p = q;
         }
         while (p != p0);
-
+        hull.push(hull[0]);
         return hull;
     }
 
@@ -361,8 +361,10 @@ class ConvexHull {
         console.log("pk, pm");
         console.log(pk);
         console.log(pm);
+
         // Determine if h contains the bridge
         if (pk.x <= a && pm.x > a) {
+
             console.log("returning")
             console.log(pk);
             console.log(pm);
