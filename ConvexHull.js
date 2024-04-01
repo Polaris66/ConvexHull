@@ -127,12 +127,9 @@ class ConvexHull {
         for (let p of upper) {
             res.push(p);
         }
-        for(let idx = lower.length-1; idx >= 0; idx--){
+        for (let idx = lower.length - 1; idx >= 0; idx--) {
             res.push(lower[idx]);
         }
-        // for (let p of lower) {
-        //     res.push(p);
-        // }
         console.log("upper");
         console.log(upper);
         console.log("lower");
@@ -168,7 +165,7 @@ class ConvexHull {
     }
 
     connect(k, m, S) {
-        let a = this.findMedian(this.deepClone(S));
+        let a = this.findMedian(this.deepClone(S)).x;
         this.simulation.push([
             TYPE.MEDIAN, a, k, m, this.deepClone(S)
         ]);
@@ -212,46 +209,101 @@ class ConvexHull {
         return;
     }
 
-    findMedian(S) {
+    slowMedian(S) {
         let T = this.deepClone(S);
         T.sort((a, b) => a.x - b.x);
-        let k = T[0];
+        console.log("T");
+        console.log(T);
+        let k = T[0].x;
         let mid = Math.floor(T.length / 2);
-        if (T.length % 2 === 0) {
-            k = (T[mid - 1].x + T[mid].x) / 2;
+        console.log("mid");
+        console.log(mid);
+        console.log(T.length % 2);
+        if ((T.length % 2) == 0) {
+            console.log('hi');
+            k = createVector((T[mid].x + T[mid-1].x) / 2,(T[mid].y + T[mid-1].y) / 2);
         } else {
-            k = T[mid].x;
+            k = createVector(T[mid].x,T[mid].y);
         }
-        return k;
+        console.log("k");
+        console.log(k);
+        return k.copy();
+
     }
 
-    // bridge(S, a) {
-    //     // Points to right of a and left of a
-    //     let right = new Set();
-    //     let left = new Set();
-    //     for (let point of S) {
-    //         if (point.x <= a) left.add(point);
-    //         else right.add(point);
-    //     }
+    findMedian(S) {
+        let T = this.deepClone(S);
+        if (T.length == 1) {
+            return T[0].copy();
+        }
+        if (T.length % 2) {
+            return this.quickSelect(T, Math.floor(T.length / 2)).copy();
+        }
+        else {
+            let a = this.quickSelect(T, Math.floor(T.length / 2) - 1);
+            let b = this.quickSelect(T, Math.floor(T.length / 2));
+            console.log(T);
+            console.log(a);
+            console.log(b);
+            return (a.copy()).add(b.copy()).div(2);
+        }
+    }
 
-    //     // Get each pair of points in right with left
-    //     for (let pleft of left) {
-    //         for (let pright of right) {
-    //             let isBridge = true;
-    //             // Check if any other point is always on right of this line
-    //             for (let point of S) {
-    //                 if (point.equals(pleft) || point.equals(pright)) {
-    //                     // Do Nothing
-    //                 } else {
-    //                     if (!this.isRightOfLine(point, pleft, pright)) isBridge = false;
-    //                 }
-    //             }
-    //             if (isBridge) {
-    //                 return [pleft, pright];
-    //             }
-    //         }
-    //     }
-    // }
+    quickSelect(A, k) {
+        if (A.length == 1) {
+            return A[0];
+        }
+
+        console.log("A");
+        console.log(A);
+        console.log("k");
+        console.log(k);
+        let pivot = this.medianOfMedians(A);
+        console.log("Pivot");
+        console.log(pivot);
+        let lows = [];
+        let highs = [];
+        let pivots = [];
+        for (let el of A) {
+            if (Math.abs(el.x - pivot.x) < Number.EPSILON) {
+                pivots.push(el);
+            }
+            else if (el.x > pivot.x) {
+                highs.push(el);
+            }
+            else if (el.x < pivot.x) {
+                lows.push(el);
+            }
+        }
+        if (k < lows.length) {
+            return this.quickSelect(lows, k);
+        }
+        else if (k < (lows.length + pivots.length)) {
+            return pivots[0];
+        }
+        else {
+            return this.quickSelect(highs, k - lows.length - pivots.length);
+        }
+    }
+
+    medianOfMedians(A) {
+        if (A.length <= 5) {
+            return this.slowMedian(A);
+        }
+
+        const chunks = this.chunked(A, 5);
+        const medians = chunks.map(chunk => this.medianOfMedians(chunk));
+
+        return this.medianOfMedians(medians);
+    }
+
+    chunked(A, chunk_size) {
+        let chunks = [];
+        for (let i = 0; i < A.length; i += chunk_size) {
+            chunks.push(A.slice(i, i + chunk_size));
+        }
+        return chunks;
+    }
 
     bridge(S, a) {
         strokeWeight(3);
@@ -293,7 +345,8 @@ class ConvexHull {
         if (newPairs.length === 0) return candidates;
         if (S.length % 2 === 1) candidates.push(S[S.length - 1]);
 
-        let K = this.findMedian(this.deepClone(slopes));
+        let K = this.findMedian(this.deepClone(slopes)).x;
+        line(a, 0, a, 600);
         console.log("K");
         console.log(K);
         let small = [];
@@ -374,14 +427,6 @@ class ConvexHull {
             console.log("Candidates");
             console.log(candidates);
             return [pk, pm];
-            // if (candidates.length === 1) {
-            //     candidates.push(pk);
-            //     candidates.push(pm);
-            //     return this.bridge(candidates, this.findMedian(candidates));
-            // } else {
-            //     return [pk, pm];
-            // }
-
         } else if (pm.x <= a) {
             for (let pair of small) {
                 console.log("small - pair")
@@ -448,13 +493,6 @@ class ConvexHull {
         }
     }
 
-    //Median of medians
-    findMedianOfPairs(P) {
-        const k = Math.floor(P.length / 2);
-        const medianPoint = this.select(P, 0, P.length - 1, k);
-        return medianPoint;
-    }
-
     mirror(P) {
         let res = []
         for (let p of P) {
@@ -462,20 +500,6 @@ class ConvexHull {
         }
         return res;
     }
-
-    deepClonePoints(P) {
-        let res = []
-        for (let p of P) {
-            res.push(createVector(p.x, p.y));
-        }
-        return res;
-    }
-
-    // // left of a line
-    // isLeftOfLine(point, p1, p2) {
-    //     let crossProduct = (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
-    //     return crossProduct > 0;
-    // }
 
     // right of a line
     isRightOfLine(point, p1, p2) {
