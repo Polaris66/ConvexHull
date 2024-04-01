@@ -124,14 +124,21 @@ class ConvexHull {
         this.UpperHull(r);
         let lower = this.mirror(this.hull);
         let res = [];
-        for(let p of lower){
-            res.push(p);
-        }
         for (let p of upper) {
             res.push(p);
         }
-        console.log("hull")
-        console.log(this.hull);
+        for(let idx = lower.length-1; idx >= 0; idx--){
+            res.push(lower[idx]);
+        }
+        // for (let p of lower) {
+        //     res.push(p);
+        // }
+        console.log("upper");
+        console.log(upper);
+        console.log("lower");
+        console.log(lower);
+        console.log("hull");
+        console.log(res);
         return res;
     }
 
@@ -161,213 +168,250 @@ class ConvexHull {
     }
 
     connect(k, m, S) {
-        let a = this.findMedian(S);
+        let a = this.findMedian(this.deepClone(S));
         this.simulation.push([
             TYPE.MEDIAN, a, k, m, this.deepClone(S)
-            ]);
+        ]);
+        console.log("Median");
         console.log(a);
         let [pi, pj] = this.bridge(S, a);
         this.simulation.push([
             TYPE.BRIDGE, a, k, m, this.deepClone(S), pi, pj
-            ]);
+        ]);
         console.log("back in connect");
-        if (!this.flag || true) {
-            this.flag = true;
-            let sLeft = [pi];
-            let sRight = [pj];
-            for (let point of S) {
-                if (point.x < pi.x) sLeft.push(point);
-                if (point.x > pj.x) sRight.push(point);
-            }
-
-            if (pi.equals(k)) {
-                this.simulation.push([
-                    TYPE.HULL_1_k, a, k, m, this.deepClone(S), pi, pj
-                    ]);
-                this.hull.push(pi);
-            } else {
-                this.simulation.push([
-                    TYPE.ELIMINATE_l, a, k, m, this.deepClone(sLeft), pi, pj
-                    ]);
-                this.connect(k, pi, sLeft);
-            }
-            if (pj.equals(m)) {
-                this.simulation.push([
-                    TYPE.HULL_1_j, a, k, m, this.deepClone(S), pi, pj
-                    ]);
-                this.hull.push(pj)
-            } else {
-                this.simulation.push([
-                    TYPE.ELIMINATE_r, a, k, m, this.deepClone(sRight), pi, pj
-                    ]);
-                this.connect(pj, m, sRight);
-            }
+        let sLeft = [pi];
+        let sRight = [pj];
+        for (let point of S) {
+            if (point.x < pi.x) sLeft.push(point);
+            if (point.x > pj.x) sRight.push(point);
         }
+
+        if (pi.equals(k)) {
+            this.simulation.push([
+                TYPE.HULL_1_k, a, k, m, this.deepClone(S), pi, pj
+            ]);
+            this.hull.push(pi);
+        } else {
+            this.simulation.push([
+                TYPE.ELIMINATE_l, a, k, m, this.deepClone(sLeft), pi, pj
+            ]);
+            this.connect(k, pi, sLeft);
+        }
+        if (pj.equals(m)) {
+            this.simulation.push([
+                TYPE.HULL_1_j, a, k, m, this.deepClone(S), pi, pj
+            ]);
+            this.hull.push(pj)
+        } else {
+            this.simulation.push([
+                TYPE.ELIMINATE_r, a, k, m, this.deepClone(sRight), pi, pj
+            ]);
+            this.connect(pj, m, sRight);
+        }
+
         return;
     }
 
     findMedian(S) {
-        S.sort((a, b) => a.x - b.x);
-        let k = S[0];
-        let mid = Math.floor(S.length / 2);
-        if (S.length % 2 === 0) {
-            k = (S[mid - 1].x + S[mid].x) / 2;
+        let T = this.deepClone(S);
+        T.sort((a, b) => a.x - b.x);
+        let k = T[0];
+        let mid = Math.floor(T.length / 2);
+        if (T.length % 2 === 0) {
+            k = (T[mid - 1].x + T[mid].x) / 2;
         } else {
-            k = S[mid].x;
+            k = T[mid].x;
         }
         return k;
     }
 
-    bridge(S, a){
-        // Points to right of a and left of a
-        let right = new Set();
-        let left = new Set();
-        for(let point of S){
-            if(point.x <= a)    left.add(point);
-            else    right.add(point);
+    // bridge(S, a) {
+    //     // Points to right of a and left of a
+    //     let right = new Set();
+    //     let left = new Set();
+    //     for (let point of S) {
+    //         if (point.x <= a) left.add(point);
+    //         else right.add(point);
+    //     }
+
+    //     // Get each pair of points in right with left
+    //     for (let pleft of left) {
+    //         for (let pright of right) {
+    //             let isBridge = true;
+    //             // Check if any other point is always on right of this line
+    //             for (let point of S) {
+    //                 if (point.equals(pleft) || point.equals(pright)) {
+    //                     // Do Nothing
+    //                 } else {
+    //                     if (!this.isRightOfLine(point, pleft, pright)) isBridge = false;
+    //                 }
+    //             }
+    //             if (isBridge) {
+    //                 return [pleft, pright];
+    //             }
+    //         }
+    //     }
+    // }
+
+    bridge(S, a) {
+        strokeWeight(3);
+        // line(a, 0, a, 600);
+        if (S.length == 2) {
+            if (S[0].x < S[1].x) return [S[0], S[1]];
+            if (S[0].x >= S[1].x) return [S[1], S[0]];
         }
 
-        // Get each pair of points in right with left
-        for(let pleft of left){
-            for(let pright of right){
-                let isBridge = true;
-                // Check if any other point is always on right of this line
-                for(let point of S){
-                    if(point.equals(pleft) || point.equals(pright)){
-                        // Do Nothing
-                    } else {
-                        if(!this.isRightOfLine(point, pleft, pright))   isBridge = false;
-                    }
-                }
-                if(isBridge){
-                    return [pleft, pright];
-                }
+        let candidates = []
+        let disjointSubsets = [];
+
+        for (let i = 0; i < S.length - 1; i += 2) {
+            disjointSubsets.push([S[i], S[i + 1]]);
+        }
+
+        let pairs = disjointSubsets.map(([a, b]) => {
+            if (a.x > b.x) {
+                return [b, a];
+            } else {
+                return [a, b];
+            }
+        });
+
+        let newPairs = [];
+        let slopes = [];
+        for (let point of pairs) {
+            let [pi, pj] = point;
+            if (pi.x === pj.x) {
+                if (pi.y > pj.y) candidates.push(pi);
+                else candidates.push(pj);
+            } else {
+                let s = (pi.y - pj.y) / (pi.x - pj.x);
+                newPairs.push([pi, pj]);
+                slopes.push(createVector(s, 0));
             }
         }
+
+        if (newPairs.length === 0) return candidates;
+        if (S.length % 2 === 1) candidates.push(S[S.length - 1]);
+
+        let K = this.findMedian(this.deepClone(slopes));
+        console.log("K");
+        console.log(K);
+        let small = [];
+        let equal = [];
+        let large = [];
+        console.log("newPairs");
+        console.log(newPairs);
+        for (let i = 0; i < slopes.length; i++) {
+            console.log("i, slopes[i], K")
+            console.log(i);
+            console.log(slopes[i].x);
+            console.log(K);
+            if (Math.abs(slopes[i].x - K) < Number.EPSILON) {
+                equal.push(newPairs[i]);
+            }
+            else if (slopes[i].x < K) {
+                small.push(newPairs[i]);
+            }
+            else if (slopes[i].x > K) {
+                large.push(newPairs[i]);
+            }
+        }
+        console.log("K");
+        console.log(K);
+        console.log("small");
+        console.log(small);
+        console.log("equal");
+        console.log(equal);
+        console.log("large");
+        console.log(large);
+        // Get line having max intersection with y axis passing through our points
+
+        let maxValue = -Infinity;
+        for (let point of S) {
+            let c = point.y - K * point.x;
+            maxValue = Math.max(maxValue, c);
+        }
+
+        console.log("maxValue");
+        console.log(maxValue);
+
+        let MAX = [];
+        for (let point of S) {
+            let c = point.y - K * point.x;
+            if (Math.abs(c - maxValue) < Number.EPSILON) {
+                MAX.push(point);
+            }
+        }
+
+
+        for (let point of MAX) {
+            stroke(0, 255, 0);
+            // line(point.x, point.y, 2 * point.x, K * point.x + point.y);
+            // line(point.x, -1 * point.y, 2 * point.x, K * point.x - point.y);
+            stroke(255);
+        }
+
+        let pk = MAX[0];
+        let pm = MAX[0];
+        for (let point of MAX) {
+            if (point.x < pk.x) pk = point;
+            if (point.x > pm.x) pm = point;
+        }
+
+        console.log("pk, pm");
+        console.log(pk);
+        console.log(pm);
+        // Determine if h contains the bridge
+        if (pk.x <= a && pm.x > a) {
+            console.log("returning")
+            console.log(pk);
+            console.log(pm);
+            // line(pk.x, pk.y, pm.x, pm.y);
+            console.log("LENGTH")
+            console.log(candidates.length);
+            console.log("Candidates");
+            console.log(candidates);
+            return [pk, pm];
+            // if (candidates.length === 1) {
+            //     candidates.push(pk);
+            //     candidates.push(pm);
+            //     return this.bridge(candidates, this.findMedian(candidates));
+            // } else {
+            //     return [pk, pm];
+            // }
+
+        } else if (pm.x <= a) {
+            for (let pair of small) {
+                console.log("small - pair")
+                candidates.push(pair[0]);
+                candidates.push(pair[1]);
+            }
+            for (let pair of large) {
+                console.log("large - pair")
+                console.log(pair);
+                candidates.push(pair[1]);
+            }
+            for (let pair of equal) {
+                console.log("equal - pair")
+                candidates.push(pair[1]);
+            }
+
+        } else if (pk.x > a) {
+            for (let pair of large) {
+                candidates.push(pair[0]);
+                candidates.push(pair[1]);
+            }
+            for (let pair of small) {
+                candidates.push(pair[0]);
+            }
+            for (let pair of equal) {
+                candidates.push(pair[0]);
+            }
+        }
+        console.log("candidates1");
+        console.log(candidates);
+        return this.bridge(candidates, a);
     }
-
-    // bridge(S, a) {
-    //     stroke(255, 0, 0);
-    //     console.log("Finding Bridge for ");
-    //     console.log(S);
-    //     line(a, 0, a, 600);
-    //     let candidates = [];
-    //     if (S.length == 2) {
-    //         if (S[0].x < S[1].x) return [S[0], S[1]];
-    //         if (S[0].x >= S[1].x) return [S[1], S[0]];
-    //     }
-
-    //     let pairs = [];
-    //     for (let idx = 0; idx < S.length - 1; idx += 2) {
-    //         let first = S[idx];
-    //         let second = S[idx + 1];
-    //         if (first.x < second.x) {
-    //             pairs.push([first, second]);
-    //         } else {
-    //             pairs.push([second, first]);
-    //         }
-    //     }
-
-    //     if (S.length % 2 === 1) candidates.push(S[S.length - 1]);
-
-    //     let slopes = [];
-
-    //     for (let pair of pairs) {
-    //         let pi = pair[0];
-    //         let pj = pair[1];
-    //         if (pi.x == pj.x) {
-    //             if (pi.y > pj.y) {
-    //                 candidates.push(pi);
-    //             } else {
-    //                 candidates.push(pj);
-    //             }
-    //         } else {
-    //             slopes.push([pair, (pi.y - pj.y) / (pi.x - pj.x)]);
-    //         }
-    //     }
-
-    //     slopes.sort((a, b) => a[1] - b[1]);
-    //     console.log("slopes");
-    //     console.log(slopes);
-
-    //     let K = slopes[Math.floor(slopes.length / 2)];
-    //     console.log("K");
-    //     console.log(K);
-    //     let small = [];
-    //     let equal = [];
-    //     let large = [];
-    //     for (let pair of slopes) {
-    //         if (pair[1] < K[1]) small.push(pair[0]);
-    //         else if (pair[1] === K[1]) equal.push(pair[0]);
-    //         else if (pair[1] > K[1]) large.push(pair[0]);
-    //     }
-
-    //     // Get line having max intersection with y axis passing through our points
-    //     let max = [];
-    //     for (let point of S) {
-    //         let c = point.y - K[1] * point.x;
-    //         max.push([point, c]);
-    //     }
-
-    //     max.sort((a, b) => a[1] - b[1]);
-
-    //     console.log("max");
-    //     console.log(max);
-
-
-    //     let pk = max[0][0];
-    //     let pm = max[1][0];
-
-    //     console.log("pk");
-    //     console.log(pk);
-
-    //     console.log("pm");
-    //     console.log(pm);
-
-    //     for (let point of max) {
-    //         if (point.x < pk.x) pk = point;
-    //         if (point.x > pm.x) pm = point;
-    //     }
-
-
-    //     // Determine if h contains the bridge
-    //     if (pk.x <= a && pm.x > 0) {
-    //         console.log("returning")
-    //         console.log(pk);
-    //         console.log(pm);
-    //         line(pk.x, pk.y, pm.x, pm.y);
-    //         return [pk, pm];
-    //     } else if (pm.x <= a) {
-    //         for (let pair of large) {
-    //             console.log("large - pair")
-    //             console.log(pair);
-    //             candidates.push(pair[1]);
-    //         }
-    //         for (let pair of equal) {
-    //             console.log("equal - pair")
-    //             candidates.push(pair[1]);
-    //         }
-    //         for (let pair of small) {
-    //             console.log("small - pair")
-    //             candidates.push(pair[1]);
-    //             candidates.push(pair[0]);
-    //         }
-    //     } else if (pk.x > a) {
-    //         for (let pair of small) {
-    //             candidates.push(pair[0]);
-    //         }
-    //         for (let pair of equal) {
-    //             candidates.push(pair[0]);
-    //         }
-    //         for (let pair of large) {
-    //             candidates.push(pair[0]);
-    //             candidates.push(pair[1]);
-    //         }
-    //     }
-    //     console.log("candidates1");
-    //     console.log(candidates);
-    //     return this.bridge(candidates, a);
-    // }
 
 
 
@@ -412,7 +456,7 @@ class ConvexHull {
     mirror(P) {
         let res = []
         for (let p of P) {
-            res.push(createVector(-1 * p.x, -1 * p.y));
+            res.push(createVector(p.x, -1 * p.y));
         }
         return res;
     }

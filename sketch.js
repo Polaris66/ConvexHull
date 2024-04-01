@@ -10,6 +10,9 @@ let simIdx = 0;
 let messageDiv;
 let simulation;
 let simulateButton;
+let numberPointsTextBox;
+let numberPoints;
+let defaultPoints = '100';
 
 const TYPE = Object.freeze({
   'MEDIAN': 0,
@@ -36,6 +39,12 @@ function setup() {
   background(0);
   stroke(255);
   strokeWeight(7);
+
+  numberPointsTextBox = createInput(defaultPoints);
+  numberPointsTextBox.position(20, 140);
+  numberPointsTextBox.id('numberPointsTextBox');
+  numberPointsTextBox.attribute('type', 'number');
+  numberPointsTextBox.attribute('placeholder', 'Enter number of points');
 
   messageDiv = createDiv('');
   messageDiv.id('messageDiv');
@@ -215,7 +224,8 @@ function generatePoints() {
   points = [];
   let w = WIDTH;
   let h = HEIGHT;
-  for (let i = 0; i < n; i++) {
+  let NUM = document.getElementById("numberPointsTextBox").value;
+  for (let i = 0; i < NUM; i++) {
       points.push(createVector(w / 8 + random() * (3 * w / 4), h / 8 + random() * (3 * h / 4)));
   }
   drawPoints(points)
