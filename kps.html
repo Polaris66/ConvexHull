@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirkpatrick–Seidel Algorithm</title>
+    <style>
+        body {
+            background-color: #131236;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-top: 0;
+        }
+
+        .section p {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h2>Kirkpatrick–Seidel Algorithm</h2>
+            <p>
+                The Kirkpatrick–Seidel algorithm, named after its inventors Richard Cole Kirkpatrick and Raimund Seidel, is an advanced algorithm for computing the convex hull of a set of points in two-dimensional Euclidean space. The algorithm is notable for its efficient time complexity, achieving an O(n log h) time complexity, where n is the number of input points and h is the number of points on the convex hull.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>Overview of the Algorithm</h2>
+            <p><strong>Preprocessing:</strong> The algorithm begins with a preprocessing step where it partitions the input points into smaller subsets and constructs a hierarchy of convex hulls. This hierarchy organizes the points in a binary tree structure, with each node representing a convex hull of a subset of points.</p>
+            <p><strong>Constructing Hierarchy:</strong> The algorithm constructs the hierarchy by recursively partitioning the input points into smaller subsets until each subset contains a constant number of points. Then, it computes the convex hull of each subset.</p>
+            <p><strong>Merging Convex Hulls:</strong> After constructing the hierarchy, the algorithm merges the convex hulls bottom-up to form larger convex hulls. This merging process maintains the convexity of the hulls while reducing the overall number of vertices.</p>
+            <p><strong>Querying:</strong> Once the hierarchy is constructed and merged, the algorithm can efficiently answer queries for the convex hull of any subset of points. This is achieved by traversing the hierarchy and combining the convex hulls of the appropriate subsets.</p>
+        </div>
+
+        <div class="section">
+            <h2>Efficiency and Complexity</h2>
+            <p>The Kirkpatrick–Seidel algorithm is highly efficient and has been widely used in computational geometry due to its asymptotically optimal time complexity. However, it is more complex to implement compared to simpler algorithms like Graham's scan or Jarvis march, and it is primarily beneficial for large datasets where its superior time complexity becomes advantageous.</p>
+        </div>
+    </div>
+</body>
+</html>

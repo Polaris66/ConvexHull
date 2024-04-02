@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #131236;
+        }
+
+        h2 {
+            margin-top: 20px;
+            color: white;
+        }
+
+        h3 {
+            text-align: left;
+            color:white;
+        }
+        h4 {
+            margin-top: 20px;
+            color: white;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h2>Simulation</h2>
+    <pre><code>The simulation array stores steps taken during the execution of algorithms for visualization purposes. Each step is represented as an array containing information about the step type and relevant data.</code></pre>
+
+    <h2>Note</h2>
+    <pre><code>The code assumes the presence of a <code>TYPE</code> object that defines constants for different types of simulation steps. These constants are used to identify and label each step in the simulation.</code></pre>
+
+    <h2>Variables</h2>
+
+    <h3>1. WIDTH</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Width of the canvas for visualization.<br>
+            <strong>Type:</strong> Number
+        </code>
+    </pre>
+
+    <h3>2. HEIGHT</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Height of the canvas for visualization.<br>
+            <strong>Type:</strong> Number
+        </code>
+    </pre>
+
+    <h3>3. points</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Array to store the points for convex hull generation.<br>
+            <strong>Type:</strong> Array
+        </code>
+    </pre>
+
+    <h3>4. n</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Number of points to generate randomly.<br>
+            <strong>Type:</strong> Number
+        </code>
+    </pre>
+
+    <!-- Add more variables as needed -->
+
+    <h2>Methods</h2>
+
+    <h3>1. setup()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Setup function to initialize the canvas and user interface.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>2. toggleAlgorithm(id)</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Toggles the selected algorithm and updates the UI.<br>
+            <strong>Parameters:</strong> id: ID of the algorithm button.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>3. toggleBrute()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Toggles the brute force algorithm.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>4. toggleKPS()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Toggles the Kirk Seidal algorithm.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>5. toggleJarvis()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Toggles the Jarvis algorithm.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>6. mousePressed()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Event handler for mouse press to add points to the canvas.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>7. drawPoints(P)</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Draws points on the canvas.<br>
+            <strong>Parameters:</strong> P: Array of points.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>8. runBruteStep()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Executes a single step of the brute force convex hull algorithm visualization.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>9. runJarvisStep()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Executes a single step of the Jarvis algorithm visualization.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>10. runKPSStep()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Executes a single step of the Kirk Seidal algorithm visualization.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>11. runSimulationStep()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Executes a single step of the convex hull algorithm visualization based on the selected algorithm.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>12. generateConvexHull()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Generates the convex hull based on the selected algorithm.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>13. generateBrute()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Generates the convex hull using the brute force algorithm.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>14. generateKPS()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Generates the convex hull using the Kirk Seidal algorithm.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>15. generateJarvis()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Generates the convex hull using the Jarvis algorithm (gift wrapping).<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>16. clearCanvas()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Clears the canvas and resets the points array.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>17. generatePoints()</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Randomly initializes points on the canvas.<br>
+            <strong>Parameters:</strong> None.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>18. sendMessage(message)</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Displays a message on the screen.<br>
+            <strong>Parameters:</strong> message: The message to be displayed.<br>
+            <strong>Returns:</strong> None.
+        </code>
+    </pre>
+
+    <h3>19. sleep(ms)</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Pauses execution for the specified duration.<br>
+            <strong>Parameters:</strong> ms: The duration to pause in milliseconds.<br>
+            <strong>Returns:</strong> A promise that resolves after the specified duration.
+        </code>
+    </pre>
+
+    <h3>20. mirror(P)</h3>
+    <pre>
+        <code>
+            <strong>Description:</strong> Mirrors the points horizontally.<br>
+            <strong>Parameters:</strong> P: Array of points to be mirrored.<br>
+            <strong>Returns:</strong> An array of mirrored points.
+        </code>
+    </pre>
+</body>
+</html>

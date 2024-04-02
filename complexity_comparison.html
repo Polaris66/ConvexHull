@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complexity Analysis</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        .table-bordered th, .table-bordered td {
+            border: 1px solid #dee2e6;
+        }
+        .table-bordered thead th, .table-bordered thead td {
+            border-bottom-width: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Complexity Analysis</h2>
+
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Algo Name</th>
+                <th scope="col" colspan="2" class="text-center">Time Complexity</th>
+                <th scope="col">Auxiliary Space</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th scope="col">Average Case</th>
+                <th scope="col">Worst Case</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Slow Convex Hull</td>
+                <td class="text-center">O(n<sup>3</sup>)</td>
+                <td class="text-center">O(n<sup>3</sup>)</td>
+                <td>O(h(n))</td>
+            </tr>
+            <tr>
+                <td>Kirkpatrick–Seidel</td>
+                <td class="text-center">O(nlogH)</td>
+                <td class="text-center">O(nlogH)</td>
+                <td>O(h(n))</td>
+            </tr>
+            <tr>
+                <td>Jarvis’ Algorithm</td>
+                <td class="text-center">O(nH)</td>
+                <td class="text-center">O(n<sup>2</sup>)</td>
+                <td>O(h(n))</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Additional Table -->
+    <h2 class="text-center mb-4">Average Time Taken for all Algorithms for n points</h2>
+
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Number of Points</th>
+                <th scope="col" colspan="3" class="text-center">Time Taken(ms)</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th scope="col">Slow Convex Hull</th>
+                <th scope="col">Kirkpatrick–Seidel</th>
+                <th scope="col">Jarvis’ Algorithm</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>10</td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+            </tr>
+            <tr>
+                <td>100</td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+            </tr>
+            <tr>
+                <td>1000</td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+            </tr>
+            <tr>
+                <td>10000</td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+                <td class="text-center"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Bootstrap JS (Optional, if you need Bootstrap JS features) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
