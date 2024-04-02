@@ -15,11 +15,18 @@ let numberPoints;
 let defaultPoints = '100';
 
 let algo = 2;
+let found = false;
 
 const ALGORITHM = Object.freeze({
   'BRUTE': 0,
   'KPS': 1,
   'JARVIS': 2,
+});
+
+
+const BRUTE_TYPE = Object.freeze({
+  'LINE': 0,
+  'TEST': 1,
 });
 
 const TYPE = Object.freeze({
@@ -29,7 +36,7 @@ const TYPE = Object.freeze({
   'ELIMINATE_r': 3,
   'HULL_1_j': 4,
   'HULL_1_k': 5,
-  'HULL_2': 6
+  'HULL_2': 6,
 });
 
 function setup() {
@@ -118,7 +125,40 @@ function drawPoints(P){
 }
 
 function runBruteStep(){
-
+  if(!found){
+    generateBrute();
+  }
+  if(found && simulation && simulation.length > 0){
+    let instruction = simulation.shift(); // Get the first instruction from the simulation array
+    console.log("====");
+    strokeWeight(4);
+    switch (instruction[0]) {
+      case BRUTE_TYPE.LINE:
+        clearCanvas();
+        stroke(0, 255, 0);
+        // Draw Points
+        drawPoints((instruction[1]));
+        // Draw Median
+        stroke(255, 0, 255);
+        line(instruction[2].x, instruction[2].y, instruction[3].x, instruction[3].y);
+        setTimeout(runSimulationStep, 1000);
+      case BRUTE_TYPE.TEST:
+        clearCanvas();
+        stroke(0, 255, 0);
+        // Draw Points
+        drawPoints((instruction[1]));
+        // Draw Median
+        stroke(255, 0, 0);
+        point(instruction[2]);
+        setTimeout(runSimulationStep, 1000);
+      default:
+        sendMessage("Simulation ended or not initialized.");
+        break;
+    }
+  }
+  else{
+    sendMessage("Simulation ended or not initialized.");
+  }
 }
 
 function runJarvisStep(){

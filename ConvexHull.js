@@ -15,9 +15,11 @@ class ConvexHull {
         for (let p of P) {
             for (let q of P) {
                 if (p != q) {
+                    this.simulation.push([TYPE.LINE, P, p, q])
                     let valid = true;
                     for (let r of P) {
                         if (r != p && r != q) {
+                            this.simulation.push([TYPE.TEST, P, r])
                             if (
                                 (q.x - p.x) * (r.y - p.y) -
                                 (q.y - p.y) * (r.x - p.x) >
