@@ -9,17 +9,16 @@ class ConvexHull {
     }
 
     // Brute Force
-
-    bruteForce(P) {
+    bruteForce(P, visualize = false) {
         let E = [];
         for (let p of P) {
             for (let q of P) {
                 if (p != q) {
-                    this.simulation.push([TYPE.BF_GET_PAIR, this.deepClone(E), this.deepClone(P), p, q])
+                    if (visualize) this.simulation.push([TYPE.BF_GET_PAIR, this.deepClone(E), this.deepClone(P), p, q]);
                     let valid = true;
                     for (let r of P) {
                         if (r != p && r != q) {
-                            this.simulation.push([TYPE.BF_CHECKPOINT, this.deepClone(E), this.deepClone(P), p, q, r])
+                            if (visualize) this.simulation.push([TYPE.BF_CHECKPOINT, this.deepClone(E), this.deepClone(P), p, q, r]);
                             if (
                                 (q.x - p.x) * (r.y - p.y) -
                                 (q.y - p.y) * (r.x - p.x) >
@@ -31,18 +30,18 @@ class ConvexHull {
                     }
                     if (valid) {
                         E.push([p, q]);
-                        this.simulation.push([TYPE.BF_UPDATE_HULL, this.deepClone(E), this.deepClone(P), p, q])
+                        if (visualize) this.simulation.push([TYPE.BF_UPDATE_HULL, this.deepClone(E), this.deepClone(P), p, q]);
                     }
                 }
             }
         }
-        console.log("this.simulation");
-        console.log(this.simulation);
+        //console.log("this.simulation");
+        //console.log(this.simulation);
         return E;
     }
 
     // Jarvis
-    jarvisAlgorithm(P) {
+    jarvisAlgorithm(P, visualize = false) {
         let hull = [];
 
         let n = P.length;
@@ -53,27 +52,19 @@ class ConvexHull {
             }
         }
 
-        this.simulation.push([
-            TYPE.J_LEFTMOST, [], P[p0], this.deepClone(P)
-        ]);
-    
+        if (visualize) this.simulation.push([TYPE.J_LEFTMOST, [], P[p0], this.deepClone(P)]);
+
         let p = p0;
         let q;
         do {
             hull.push(P[p]);
-            this.simulation.push([
-                TYPE.J_UPDATE_HULL, this.deepClone(hull), P[p], P[p], P[p], this.deepClone(P)
-            ]);
+            if (visualize) this.simulation.push([TYPE.J_UPDATE_HULL, this.deepClone(hull), P[p], P[p], P[p], this.deepClone(P)]);
             q = (p + 1) % n;
-            
+
             for (let i = 0; i < n; i++) {
-                this.simulation.push([
-                    TYPE.J_CHOOSEQ, this.deepClone(hull), P[p], P[q], P[i], this.deepClone(P)
-                ]);
+                if (visualize) this.simulation.push([TYPE.J_CHOOSEQ, this.deepClone(hull), P[p], P[q], P[i], this.deepClone(P)]);
                 if (this.orientation(P[p], P[i], P[q])) {
-                    this.simulation.push([
-                        TYPE.J_REJECTORIENTATION, this.deepClone(hull), P[p], P[q], P[i], this.deepClone(P)
-                    ]);
+                    if (visualize) this.simulation.push([TYPE.J_REJECTORIENTATION, this.deepClone(hull), P[p], P[q], P[i], this.deepClone(P)]);
                     q = i;
                 }
             }
@@ -92,20 +83,13 @@ class ConvexHull {
     }
 
     // KPS
-
-
-
-    KPS(P) {
-        let q = this.deepClone(P);
-        this.UpperHull(q);
+    KPS(P, visualize = false) {
+        this.UpperHull(P, visualize);
         let upper = this.deepClone(this.hull);
         this.hull = [];
-        let r = this.mirror(P);
-        console.log("r val")
-        console.log(r);
-        console.log(upper);
-        this.UpperHull(r);
-        let lower = this.mirror(this.hull);
+        //console.log(upper);
+        this.UpperHull(this.mirror(P), visualize);
+        let lower = this.deepClone(this.mirror(this.hull));
         let res = [];
         for (let p of upper) {
             res.push(p);
@@ -113,16 +97,16 @@ class ConvexHull {
         for (let idx = 0; idx < lower.length; idx++) {
             res.push(lower[idx]);
         }
-        console.log("upper");
-        console.log(upper);
-        console.log("lower");
-        console.log(lower);
-        console.log("hull");
-        console.log(res);
+        //console.log("upper");
+        //console.log(upper);
+        //console.log("lower");
+        //console.log(lower);
+        //console.log("hull");
+        //console.log(res);
         return res;
     }
 
-    UpperHull(P) {
+    UpperHull(P, visualize) {
         let pmin = P[0];
         let pmax = P[0];
         for (let point of P) {
@@ -143,22 +127,18 @@ class ConvexHull {
             }
         }
 
-        this.connect(pmin, pmax, T);
+        this.connect(pmin, pmax, T, visualize);
         return;
     }
 
-    connect(k, m, S) {
-        let a = this.findMedian(this.deepClone(S)).x;
-        this.simulation.push([
-            TYPE.MEDIAN, a, k, m, this.deepClone(S)
-        ]);
-        console.log("Median");
-        console.log(a);
+    connect(k, m, S, visualize) {
+        let a = this.findMedian(S).x;
+        if (visualize) this.simulation.push([TYPE.MEDIAN, a, k, m, this.deepClone(S)]);
+        //console.log("Median");
+        //console.log(a);
         let [pi, pj] = this.bridge(S, a);
-        this.simulation.push([
-            TYPE.BRIDGE, a, k, m, this.deepClone(S), pi, pj
-        ]);
-        console.log("back in connect");
+        if (visualize) this.simulation.push([TYPE.BRIDGE, a, k, m, this.deepClone(S), pi, pj]);
+        //console.log("back in connect");
         let sLeft = [pi];
         let sRight = [pj];
         for (let point of S) {
@@ -167,34 +147,25 @@ class ConvexHull {
         }
 
         if (pi.equals(k)) {
-            this.simulation.push([
-                TYPE.HULL_1_k, a, k, m, this.deepClone(S), pi, pj
-            ]);
+            if (visualize) this.simulation.push([TYPE.HULL_1_k, a, k, m, this.deepClone(S), pi, pj]);
             this.hull.push(pi);
         } else {
-            this.simulation.push([
-                TYPE.ELIMINATE_l, a, k, m, this.deepClone(sLeft), pi, pj
-            ]);
-            this.connect(k, pi, sLeft);
+            if (visualize) this.simulation.push([TYPE.ELIMINATE_l, a, k, m, this.deepClone(sLeft), pi, pj]);
+            this.connect(k, pi, sLeft, visualize);
         }
         if (pj.equals(m)) {
-            this.simulation.push([
-                TYPE.HULL_1_j, a, k, m, this.deepClone(S), pi, pj
-            ]);
+            if (visualize) this.simulation.push([TYPE.HULL_1_j, a, k, m, this.deepClone(S), pi, pj]);
             this.hull.push(pj)
         } else {
-            this.simulation.push([
-                TYPE.ELIMINATE_r, a, k, m, this.deepClone(sRight), pi, pj
-            ]);
-            this.connect(pj, m, sRight);
+            if (visualize) this.simulation.push([TYPE.ELIMINATE_r, a, k, m, this.deepClone(sRight), pi, pj]);
+            this.connect(pj, m, sRight, visualize);
         }
-
         return;
     }
 
 
     bridge(S, a) {
-        strokeWeight(3);
+        // strokeWeight(3);
         // line(a, 0, a, 600);
         if (S.length == 2) {
             if (S[0].x < S[1].x) return [S[0], S[1]];
@@ -233,20 +204,20 @@ class ConvexHull {
         if (newPairs.length === 0) return candidates;
         if (S.length % 2 === 1) candidates.push(S[S.length - 1]);
 
-        let K = this.findMedian(this.deepClone(slopes)).x;
+        let K = this.findMedian(slopes).x;
         // line(a, 0, a, 600);
-        console.log("K");
-        console.log(K);
+        //console.log("K");
+        //console.log(K);
         let small = [];
         let equal = [];
         let large = [];
-        console.log("newPairs");
-        console.log(newPairs);
+        //console.log("newPairs");
+        //console.log(newPairs);
         for (let i = 0; i < slopes.length; i++) {
-            console.log("i, slopes[i], K")
-            console.log(i);
-            console.log(slopes[i].x);
-            console.log(K);
+            // console.log("i, slopes[i], K")
+            // console.log(i);
+            // console.log(slopes[i].x);
+            // console.log(K);
             if (Math.abs(slopes[i].x - K) < 0.00001) {
                 equal.push(newPairs[i]);
             }
@@ -257,14 +228,14 @@ class ConvexHull {
                 large.push(newPairs[i]);
             }
         }
-        console.log("K");
-        console.log(K);
-        console.log("small");
-        console.log(small);
-        console.log("equal");
-        console.log(equal);
-        console.log("large");
-        console.log(large);
+        //console.log("K");
+        //console.log(K);
+        //console.log("small");
+        //console.log(small);
+        //console.log("equal");
+        //console.log(equal);
+        //console.log("large");
+        //console.log(large);
         // Get line having max intersection with y axis passing through our points
 
         let maxValue = -Infinity;
@@ -273,8 +244,8 @@ class ConvexHull {
             maxValue = Math.max(maxValue, c);
         }
 
-        console.log("maxValue");
-        console.log(maxValue);
+        //console.log("maxValue");
+        //console.log(maxValue);
 
         let MAX = [];
         for (let point of S) {
@@ -284,7 +255,7 @@ class ConvexHull {
             }
         }
 
-        console.log(MAX);
+        //console.log(MAX);
         for (let point of MAX) {
             stroke(0, 255, 0);
             // line(point.x, point.y, 2 * point.x, K * point.x + point.y);
@@ -299,35 +270,35 @@ class ConvexHull {
             if (point.x > pm.x) pm = point;
         }
 
-        console.log("pk, pm");
-        console.log(pk);
-        console.log(pm);
+        //console.log("pk, pm");
+        //console.log(pk);
+        //console.log(pm);
 
         // Determine if h contains the bridge
         if (pk.x <= a && pm.x > a) {
 
-            console.log("returning")
-            console.log(pk);
-            console.log(pm);
+            // console.log("returning")
+            // console.log(pk);
+            // console.log(pm);
             // line(pk.x, pk.y, pm.x, pm.y);
-            console.log("LENGTH")
-            console.log(candidates.length);
-            console.log("Candidates");
-            console.log(candidates);
+            // console.log("LENGTH")
+            // console.log(candidates.length);
+            // console.log("Candidates");
+            // console.log(candidates);
             return [pk, pm];
         } else if (pm.x <= a) {
             for (let pair of small) {
-                console.log("small - pair")
+                // console.log("small - pair")
                 candidates.push(pair[0]);
                 candidates.push(pair[1]);
             }
             for (let pair of large) {
-                console.log("large - pair")
-                console.log(pair);
+                // console.log("large - pair")
+                // console.log(pair);
                 candidates.push(pair[1]);
             }
             for (let pair of equal) {
-                console.log("equal - pair")
+                // console.log("equal - pair")
                 candidates.push(pair[1]);
             }
 
@@ -343,8 +314,8 @@ class ConvexHull {
                 candidates.push(pair[0]);
             }
         }
-        console.log("candidates1");
-        console.log(candidates);
+        //console.log("candidates1");
+        //console.log(candidates);
         return this.bridge(candidates, a);
     }
 
@@ -361,10 +332,10 @@ class ConvexHull {
         // console.log(mid);
         // console.log(T.length % 2);
         if ((T.length % 2) == 0) {
-            console.log('hi');
-            k = createVector((T[mid].x + T[mid-1].x) / 2,(T[mid].y + T[mid-1].y) / 2);
+            // console.log('hi');
+            k = createVector((T[mid].x + T[mid - 1].x) / 2, (T[mid].y + T[mid - 1].y) / 2);
         } else {
-            k = createVector(T[mid].x,T[mid].y);
+            k = createVector(T[mid].x, T[mid].y);
         }
         // console.log("k");
         // console.log(k);
@@ -373,7 +344,7 @@ class ConvexHull {
     }
 
     findMedian(S) {
-        let T = this.deepClone(S);
+        let T = S;
         if (T.length == 1) {
             return T[0].copy();
         }
@@ -450,10 +421,10 @@ class ConvexHull {
         return [...P];
     }
 
-    mirror(P){
+    mirror(P) {
         let res = [];
-        for(let p of P){
-            res.push(createVector(-p.x,-p.y));
+        for (let p of P) {
+            res.push(createVector(-p.x, -p.y));
         }
         return res;
     }

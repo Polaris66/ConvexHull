@@ -12,7 +12,7 @@ let simulation;
 let simulateButton;
 let numberPointsTextBox;
 let numberPoints;
-let defaultPoints = '100';
+let defaultPoints = '1000000';
 let TIMEOUT = 1000;
 
 let algo = 0;
@@ -165,6 +165,9 @@ function drawPoints(P) {
   }
 }
 function runBruteStep() {
+  if(!found){
+    generateBrute(true);
+  }
   if (found && simulation && simulation.length > 0) {
     let instruction = simulation.shift();
     strokeWeight(4);
@@ -224,6 +227,9 @@ function runBruteStep() {
 }
 
 function runJarvisStep() {
+  if(!found){
+    generateJarvis(true);
+  }
   if (found && simulation && simulation.length > 0) {
     let instruction = simulation.shift(); // Get the first instruction from the simulation array
     console.log("====");
@@ -331,6 +337,9 @@ function runJarvisStep() {
 }
 
 function runKPSStep() {
+  if(!found){
+    generateKPS(true);
+  }
   if (found && simulation && simulation.length > 0) {
     let instruction = simulation.shift(); // Get the first instruction from the simulation array
     console.log("====");
@@ -460,10 +469,11 @@ function generateConvexHull() {
     sendMessage("At least 3 points are required to generate a convex hull.");
   }
 }
-function generateBrute() {
+
+function generateBrute(visualize = false) {
   let convex = new ConvexHull();
   convex.points = points.slice();
-  let edges = convex.bruteForce(points);
+  let edges = convex.bruteForce(points, visualize);
   console.log(edges);
   simulation = convex.simulation;
   console.log(convex.simulation);
@@ -473,14 +483,35 @@ function generateBrute() {
     line(edges[i][0].x, edges[i][0].y, edges[i][1].x, edges[i][1].y);
   }
   initialized = true;
-  found = true;
+  if(visualize){
+    found = true;
+  }
   sendMessage("Convex hull generated successfully.");
 }
 
-function generateKPS() {
+function generateKPS(visualize = false) {
   let convex = new ConvexHull();
   convex.points = points.slice();
-  let hull = convex.KPS(points);
+  let hull = convex.KPS(points, visualize);
+  simulation = convex.simulation;
+  console.log("simulation");
+  console.log(convex.simulation);
+  strokeWeight(5);
+  stroke(255, 0, 0);
+  for (let i = 0; i < hull.length - 1; i++) {
+    line(hull[i].x, hull[i].y, hull[i + 1].x, hull[i + 1].y);
+  }
+  initialized = true;
+  if(visualize){
+    found = true;
+  }
+  sendMessage("Convex hull generated successfully.");
+}
+
+function generateJarvis(visualize = false) {
+  let convex = new ConvexHull();
+  convex.points = points.slice();
+  let hull = convex.jarvisAlgorithm(points, visualize);
   simulation = convex.simulation;
   console.log(convex.simulation);
   strokeWeight(5);
@@ -489,23 +520,9 @@ function generateKPS() {
     line(hull[i].x, hull[i].y, hull[i + 1].x, hull[i + 1].y);
   }
   initialized = true;
-  found = true;
-  sendMessage("Convex hull generated successfully.");
-}
-
-function generateJarvis() {
-  let convex = new ConvexHull();
-  convex.points = points.slice();
-  let hull = convex.jarvisAlgorithm(points);
-  simulation = convex.simulation;
-  console.log(convex.simulation);
-  strokeWeight(5);
-  stroke(255, 0, 0);
-  for (let i = 0; i < hull.length - 1; i++) {
-    line(hull[i].x, hull[i].y, hull[i + 1].x, hull[i + 1].y);
+  if(visualize){
+    found = true;
   }
-  initialized = true;
-  found = true;
   sendMessage("Convex hull generated successfully.");
 }
 
