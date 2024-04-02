@@ -117,7 +117,15 @@ function drawPoints(P){
   }
 }
 
-function runSimulationStep() {
+function runBruteStep(){
+
+}
+
+function runJarvisStep(){
+
+}
+
+function runKPSStep() {
   if (found && simulation && simulation.length > 0) {
     let instruction = simulation.shift(); // Get the first instruction from the simulation array
     console.log("====");
@@ -217,6 +225,18 @@ function runSimulationStep() {
     }
   } else {
     sendMessage("Simulation ended or not initialized.");
+  }
+}
+
+function runSimulationStep(){
+  if(algo == ALGORITHM.BRUTE){
+    runBruteStep();
+  }
+  else if(algo == ALGORITHM.KPS){
+    runKPSStep();
+  }
+  else if(algo == ALGORITHM.JARVIS){
+    runJarvisStep();
   }
 }
 
