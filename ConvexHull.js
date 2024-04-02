@@ -8,17 +8,9 @@ class ConvexHull {
         this.simulation = [];
     }
 
-    generatePoints(n, w, h) {
-        for (let i = 0; i < n; i++) {
-            this.points.push(createVector(w / 8 + random() * (3 * w / 4), h / 8 + random() * (3 * h / 4)));
-        }
-        this.showPoints(this.points);
-        return;
-    }
+    // Brute Force
 
-    // Slow Convex Hull
-
-    slowConvexHull(P) {
+    bruteForce(P) {
         let E = [];
         for (let p of P) {
             for (let q of P) {
@@ -45,7 +37,6 @@ class ConvexHull {
     }
 
     // Jarvis
-
     jarvisAlgorithm(P) {
         let hull = [];
 
@@ -61,7 +52,7 @@ class ConvexHull {
         let q;
         do {
             hull.push(P[p]);
-
+            
             q = (p + 1) % n;
 
             for (let i = 0; i < n; i++) {
@@ -83,34 +74,9 @@ class ConvexHull {
         return (val > 0); // clockwise or anti clockwise
     }
 
-    // Code for showing
-    showEdges(E) {
-        for (let e of E) {
-            line(e[0].x, e[0].y, e[1].x, e[1].y);
-        }
-    }
-
-    showPoints() {
-        this.points.forEach((p) => {
-            point(p);
-        });
-    }
-
-
-    points2Edges(P) {
-        let E = [];
-        let n = P.length;
-        for (let i = 0; i < n; i++) {
-            E.push([P[i], P[(i + 1) % n]]);
-        }
-        return E;
-    }
-
     // KPS
 
-    deepClone(P) {
-        return [...P];
-    }
+
 
     KPS(P) {
         let q = this.deepClone(P);
@@ -209,101 +175,6 @@ class ConvexHull {
         return;
     }
 
-    slowMedian(S) {
-        let T = this.deepClone(S);
-        T.sort((a, b) => a.x - b.x);
-        console.log("T");
-        console.log(T);
-        let k = T[0].x;
-        let mid = Math.floor(T.length / 2);
-        console.log("mid");
-        console.log(mid);
-        console.log(T.length % 2);
-        if ((T.length % 2) == 0) {
-            console.log('hi');
-            k = createVector((T[mid].x + T[mid-1].x) / 2,(T[mid].y + T[mid-1].y) / 2);
-        } else {
-            k = createVector(T[mid].x,T[mid].y);
-        }
-        console.log("k");
-        console.log(k);
-        return k.copy();
-
-    }
-
-    findMedian(S) {
-        let T = this.deepClone(S);
-        if (T.length == 1) {
-            return T[0].copy();
-        }
-        if (T.length % 2) {
-            return this.quickSelect(T, Math.floor(T.length / 2)).copy();
-        }
-        else {
-            let a = this.quickSelect(T, Math.floor(T.length / 2) - 1);
-            let b = this.quickSelect(T, Math.floor(T.length / 2));
-            console.log(T);
-            console.log(a);
-            console.log(b);
-            return (a.copy()).add(b.copy()).div(2);
-        }
-    }
-
-    quickSelect(A, k) {
-        if (A.length == 1) {
-            return A[0];
-        }
-
-        console.log("A");
-        console.log(A);
-        console.log("k");
-        console.log(k);
-        let pivot = this.medianOfMedians(A);
-        console.log("Pivot");
-        console.log(pivot);
-        let lows = [];
-        let highs = [];
-        let pivots = [];
-        for (let el of A) {
-            if (Math.abs(el.x - pivot.x) < Number.EPSILON) {
-                pivots.push(el);
-            }
-            else if (el.x > pivot.x) {
-                highs.push(el);
-            }
-            else if (el.x < pivot.x) {
-                lows.push(el);
-            }
-        }
-        if (k < lows.length) {
-            return this.quickSelect(lows, k);
-        }
-        else if (k < (lows.length + pivots.length)) {
-            return pivots[0];
-        }
-        else {
-            return this.quickSelect(highs, k - lows.length - pivots.length);
-        }
-    }
-
-    medianOfMedians(A) {
-        if (A.length <= 5) {
-            return this.slowMedian(A);
-        }
-
-        const chunks = this.chunked(A, 5);
-        const medians = chunks.map(chunk => this.medianOfMedians(chunk));
-
-        return this.medianOfMedians(medians);
-    }
-
-    chunked(A, chunk_size) {
-        let chunks = [];
-        for (let i = 0; i < A.length; i += chunk_size) {
-            chunks.push(A.slice(i, i + chunk_size));
-        }
-        return chunks;
-    }
 
     bridge(S, a) {
         strokeWeight(3);
@@ -346,7 +217,7 @@ class ConvexHull {
         if (S.length % 2 === 1) candidates.push(S[S.length - 1]);
 
         let K = this.findMedian(this.deepClone(slopes)).x;
-        line(a, 0, a, 600);
+        // line(a, 0, a, 600);
         console.log("K");
         console.log(K);
         let small = [];
@@ -461,49 +332,112 @@ class ConvexHull {
     }
 
 
-
-    partition(arr, left, right, pivotIndex) {
-        const pivotValue = arr[pivotIndex].x;
-        [arr[pivotIndex], arr[right]] = [arr[right], arr[pivotIndex]];
-        let storeIndex = left;
-        for (let i = left; i < right; i++) {
-            if (arr[i].x < pivotValue) {
-                [arr[i], arr[storeIndex]] = [arr[storeIndex], arr[i]];
-                storeIndex++;
-            }
+    // Auxillary Functions
+    slowMedian(S) {
+        let T = this.deepClone(S);
+        T.sort((a, b) => a.x - b.x);
+        console.log("T");
+        console.log(T);
+        let k = T[0].x;
+        let mid = Math.floor(T.length / 2);
+        console.log("mid");
+        console.log(mid);
+        console.log(T.length % 2);
+        if ((T.length % 2) == 0) {
+            console.log('hi');
+            k = createVector((T[mid].x + T[mid-1].x) / 2,(T[mid].y + T[mid-1].y) / 2);
+        } else {
+            k = createVector(T[mid].x,T[mid].y);
         }
-        [arr[right], arr[storeIndex]] = [arr[storeIndex], arr[right]];
-        return storeIndex;
+        console.log("k");
+        console.log(k);
+        return k.copy();
+
     }
 
-    select(arr, left, right, k) {
-        while (true) {
-            if (left === right) {
-                return arr[left];
-            }
-            let pivotIndex = Math.floor((left + right) / 2);
-            pivotIndex = this.partition(arr, left, right, pivotIndex);
-            if (k === pivotIndex) {
-                return arr[k];
-            } else if (k < pivotIndex) {
-                right = pivotIndex - 1;
-            } else {
-                left = pivotIndex + 1;
-            }
+    findMedian(S) {
+        let T = this.deepClone(S);
+        if (T.length == 1) {
+            return T[0].copy();
+        }
+        if (T.length % 2) {
+            return this.quickSelect(T, Math.floor(T.length / 2)).copy();
+        }
+        else {
+            let a = this.quickSelect(T, Math.floor(T.length / 2) - 1);
+            let b = this.quickSelect(T, Math.floor(T.length / 2));
+            console.log(T);
+            console.log(a);
+            console.log(b);
+            return (a.copy()).add(b.copy()).div(2);
         }
     }
 
-    mirror(P) {
-        let res = []
-        for (let p of P) {
-            res.push(createVector(p.x, -1 * p.y));
+    quickSelect(A, k) {
+        if (A.length == 1) {
+            return A[0];
+        }
+
+        console.log("A");
+        console.log(A);
+        console.log("k");
+        console.log(k);
+        let pivot = this.medianOfMedians(A);
+        console.log("Pivot");
+        console.log(pivot);
+        let lows = [];
+        let highs = [];
+        let pivots = [];
+        for (let el of A) {
+            if (Math.abs(el.x - pivot.x) < Number.EPSILON) {
+                pivots.push(el);
+            }
+            else if (el.x > pivot.x) {
+                highs.push(el);
+            }
+            else if (el.x < pivot.x) {
+                lows.push(el);
+            }
+        }
+        if (k < lows.length) {
+            return this.quickSelect(lows, k);
+        }
+        else if (k < (lows.length + pivots.length)) {
+            return pivots[0];
+        }
+        else {
+            return this.quickSelect(highs, k - lows.length - pivots.length);
+        }
+    }
+
+    medianOfMedians(A) {
+        if (A.length <= 5) {
+            return this.slowMedian(A);
+        }
+
+        const chunks = this.chunked(A, 5);
+        const medians = chunks.map(chunk => this.medianOfMedians(chunk));
+
+        return this.medianOfMedians(medians);
+    }
+
+    chunked(A, chunk_size) {
+        let chunks = [];
+        for (let i = 0; i < A.length; i += chunk_size) {
+            chunks.push(A.slice(i, i + chunk_size));
+        }
+        return chunks;
+    }
+
+    deepClone(P) {
+        return [...P];
+    }
+
+    mirror(P){
+        let res = [];
+        for(let p of P){
+            res.push(createVector(-p.x,-p.y));
         }
         return res;
-    }
-
-    // right of a line
-    isRightOfLine(point, p1, p2) {
-        let crossProduct = (p2.x - p1.x) * (point.y - p1.y) - (p2.y - p1.y) * (point.x - p1.x);
-        return crossProduct < 0;
     }
 }
