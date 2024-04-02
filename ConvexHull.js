@@ -110,7 +110,7 @@ class ConvexHull {
         for (let p of upper) {
             res.push(p);
         }
-        for (let idx = lower.length - 1; idx >= 0; idx--) {
+        for (let idx = 0; idx < lower.length; idx++) {
             res.push(lower[idx]);
         }
         console.log("upper");
@@ -247,7 +247,7 @@ class ConvexHull {
             console.log(i);
             console.log(slopes[i].x);
             console.log(K);
-            if (Math.abs(slopes[i].x - K) < Number.EPSILON) {
+            if (Math.abs(slopes[i].x - K) < 0.00001) {
                 equal.push(newPairs[i]);
             }
             else if (slopes[i].x < K) {
@@ -279,12 +279,12 @@ class ConvexHull {
         let MAX = [];
         for (let point of S) {
             let c = point.y - K * point.x;
-            if (Math.abs(c - maxValue) < Number.EPSILON) {
+            if (Math.abs(c - maxValue) < 0.00001) {
                 MAX.push(point);
             }
         }
 
-
+        console.log(MAX);
         for (let point of MAX) {
             stroke(0, 255, 0);
             // line(point.x, point.y, 2 * point.x, K * point.x + point.y);
@@ -353,21 +353,21 @@ class ConvexHull {
     slowMedian(S) {
         let T = this.deepClone(S);
         T.sort((a, b) => a.x - b.x);
-        console.log("T");
-        console.log(T);
+        // console.log("T");
+        // console.log(T);
         let k = T[0].x;
         let mid = Math.floor(T.length / 2);
-        console.log("mid");
-        console.log(mid);
-        console.log(T.length % 2);
+        // console.log("mid");
+        // console.log(mid);
+        // console.log(T.length % 2);
         if ((T.length % 2) == 0) {
             console.log('hi');
             k = createVector((T[mid].x + T[mid-1].x) / 2,(T[mid].y + T[mid-1].y) / 2);
         } else {
             k = createVector(T[mid].x,T[mid].y);
         }
-        console.log("k");
-        console.log(k);
+        // console.log("k");
+        // console.log(k);
         return k.copy();
 
     }
@@ -383,9 +383,9 @@ class ConvexHull {
         else {
             let a = this.quickSelect(T, Math.floor(T.length / 2) - 1);
             let b = this.quickSelect(T, Math.floor(T.length / 2));
-            console.log(T);
-            console.log(a);
-            console.log(b);
+            // console.log(T);
+            // console.log(a);
+            // console.log(b);
             return (a.copy()).add(b.copy()).div(2);
         }
     }
@@ -395,18 +395,18 @@ class ConvexHull {
             return A[0];
         }
 
-        console.log("A");
-        console.log(A);
-        console.log("k");
-        console.log(k);
+        // console.log("A");
+        // console.log(A);
+        // console.log("k");
+        // console.log(k);
         let pivot = this.medianOfMedians(A);
-        console.log("Pivot");
-        console.log(pivot);
+        // console.log("Pivot");
+        // console.log(pivot);
         let lows = [];
         let highs = [];
         let pivots = [];
         for (let el of A) {
-            if (Math.abs(el.x - pivot.x) < Number.EPSILON) {
+            if (Math.abs(el.x - pivot.x) < 0.00001) {
                 pivots.push(el);
             }
             else if (el.x > pivot.x) {

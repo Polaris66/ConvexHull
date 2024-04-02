@@ -12,10 +12,10 @@ let simulation;
 let simulateButton;
 let numberPointsTextBox;
 let numberPoints;
-let defaultPoints = '10';
+let defaultPoints = '100';
 let TIMEOUT = 1000;
 
-let algo = 2;
+let algo = 1;
 let found = false;
 
 const ALGORITHM = Object.freeze({
@@ -498,6 +498,9 @@ function generatePoints() {
   for (let i = 0; i < NUM; i++) {
     points.push(createVector(w / 8 + random() * (3 * w / 4), h / 8 + random() * (3 * h / 4)));
   }
+  // points.push(createVector(176.29774904394873, 413.7634967776654));
+  // points.push(createVector(389.70764196174673, 353.7124942814699))
+  // points.push(createVector(247.00453644173467, 385.06199091236857))
   drawPoints(points)
   initialized = true;
   found = false;
