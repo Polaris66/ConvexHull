@@ -15,11 +15,11 @@ class ConvexHull {
         for (let p of P) {
             for (let q of P) {
                 if (p != q) {
-                    this.simulation.push([TYPE.LINE, P, p, q])
+                    this.simulation.push([TYPE.BF_GET_PAIR, this.deepClone(E), this.deepClone(P), p, q])
                     let valid = true;
                     for (let r of P) {
                         if (r != p && r != q) {
-                            this.simulation.push([TYPE.TEST, P, r])
+                            this.simulation.push([TYPE.BF_CHECKPOINT, this.deepClone(E), this.deepClone(P), p, q, r])
                             if (
                                 (q.x - p.x) * (r.y - p.y) -
                                 (q.y - p.y) * (r.x - p.x) >
@@ -31,10 +31,13 @@ class ConvexHull {
                     }
                     if (valid) {
                         E.push([p, q]);
+                        this.simulation.push([TYPE.BF_UPDATE_HULL, this.deepClone(E), this.deepClone(P), p, q])
                     }
                 }
             }
         }
+        console.log("this.simulation");
+        console.log(this.simulation);
         return E;
     }
 
@@ -50,15 +53,27 @@ class ConvexHull {
             }
         }
 
+        this.simulation.push([
+            TYPE.J_LEFTMOST, [], P[p0], this.deepClone(P)
+        ]);
+    
         let p = p0;
         let q;
         do {
             hull.push(P[p]);
-            
+            this.simulation.push([
+                TYPE.J_UPDATE_HULL, this.deepClone(hull), P[p], P[p], P[p], this.deepClone(P)
+            ]);
             q = (p + 1) % n;
-
+            
             for (let i = 0; i < n; i++) {
+                this.simulation.push([
+                    TYPE.J_CHOOSEQ, this.deepClone(hull), P[p], P[q], P[i], this.deepClone(P)
+                ]);
                 if (this.orientation(P[p], P[i], P[q])) {
+                    this.simulation.push([
+                        TYPE.J_REJECTORIENTATION, this.deepClone(hull), P[p], P[q], P[i], this.deepClone(P)
+                    ]);
                     q = i;
                 }
             }
