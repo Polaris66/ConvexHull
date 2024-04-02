@@ -15,7 +15,7 @@ let numberPoints;
 let defaultPoints = '100';
 let TIMEOUT = 1000;
 
-let algo = 1;
+let algo = 0;
 let found = false;
 
 const ALGORITHM = Object.freeze({
@@ -48,63 +48,92 @@ const TYPE = Object.freeze({
   'BF_UPDATE_HULL': 14,
 });
 
+
 function setup() {
   let container = createDiv();
-  container.style('display', 'flex');
-  container.style('align-items', 'center');
-  container.style('padding-top', '20px');
-  container.style('margin-top', '10vh');
-  container.style('justify-content', 'center');
-  container.style('align-items', 'center');
-  container.style('height', '80vh');
-  createCanvas(WIDTH, HEIGHT).parent(container);
+  container.class('flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white');
 
+  let header = createDiv("Convex Hull Visualizer");
+  header.class('text-4xl font-bold mb-8 py-4');
 
-  background(0);
-  stroke(255);
-  strokeWeight(7);
+  let buttonsContainer = createDiv();
+  buttonsContainer.class('flex flex-wrap justify-center mb-8');
 
-  numberPointsTextBox = createInput(defaultPoints);
-  numberPointsTextBox.position(20, 140);
+  let buttonClasses = 'bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mx-2 transition-colors duration-300 mt-10';
+  let algobuttonClasses = 'algorithm-button bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mx-2 transition-colors duration-300 mt-10';
+
+  generateButton = createButton('Generate Convex Hull');
+  generateButton.class(buttonClasses);
+  generateButton.mousePressed(generateConvexHull);
+  buttonsContainer.child(generateButton);
+
+  randomlyInitializeButton = createButton('Randomly Initialize Points');
+  randomlyInitializeButton.class(buttonClasses);
+  randomlyInitializeButton.mousePressed(generatePoints);
+  buttonsContainer.child(randomlyInitializeButton);
+
+  clearButton = createButton('Clear Canvas');
+  clearButton.class(buttonClasses);
+  clearButton.mousePressed(clearCanvas);
+  buttonsContainer.child(clearButton);
+
+  simulateButton = createButton('Visualize');
+  simulateButton.class(buttonClasses);
+  simulateButton.mousePressed(runSimulationStep);
+  buttonsContainer.child(simulateButton);
+
+  let algorithmButtons = [['Brute Force', 'BruteForce'], ['Kirk Seidal Algorithm', 'KPS'], ['Jarvis Algorithm', 'Jarvis']];
+  algorithmButtons.forEach(algorithm => {
+    let algorithmButton = createButton(algorithm[0]);
+    algorithmButton.class(algobuttonClasses);
+    algorithmButton.id(algorithm[1]);
+    algorithmButton.mousePressed(() => toggleAlgorithm(algorithm[1]));
+    buttonsContainer.child(algorithmButton);
+  });
+
+  container.child(header);
+  container.child(buttonsContainer);
+
+  let numberPointsTextBox = createInput(defaultPoints);
+  numberPointsTextBox.class('bg-gray-200 text-gray-700 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-600');
   numberPointsTextBox.id('numberPointsTextBox');
   numberPointsTextBox.attribute('type', 'number');
   numberPointsTextBox.attribute('placeholder', 'Enter number of points');
+  container.child(numberPointsTextBox);
 
-  messageDiv = createDiv('');
+  let messageDiv = createDiv('');
   messageDiv.id('messageDiv');
-  messageDiv.style('font-size', '20px');
-  messageDiv.style('height', '50px');
-  messageDiv.style('width', 'full');
-  messageDiv.style('border', '2px solid black');
+  messageDiv.class('bg-gray-200 text-gray-700 py-2 px-4 rounded-lg my-4');
+  messageDiv.style('font-size', '16px');
+  container.child(messageDiv);
 
-  generateButton = createButton('Generate Convex Hull');
-  generateButton.position(20, 20);
-  generateButton.mousePressed(generateConvexHull);
+  let canvasContainer = createDiv();
+  canvasContainer.class('border-4 border-gray-300 rounded-lg my-4');
+  createCanvas(WIDTH, HEIGHT).parent(canvasContainer);
+  background(0);
+  stroke(255);
+  strokeWeight(4);
+  container.child(canvasContainer);
+}
 
-  randomlyInitializeButton = createButton('Randomly Initialize Points');
-  randomlyInitializeButton.position(20, 80);
-  randomlyInitializeButton.mousePressed(generatePoints);
+function toggleAlgorithm(id) {
+  document.querySelectorAll('.algorithm-button').forEach(button => {
+      button.classList.remove('bg-orange-600');
+      button.classList.remove('bg-indigo-600');
+      button.classList.add('bg-indigo-600');
+  });
 
-  clearButton = createButton('Clear Canvas');
-  clearButton.position(20, 50);
-  clearButton.mousePressed(clearCanvas);
+  let button = document.getElementById(id);
+  button.classList.remove('bg-indigo-600');
+  button.classList.add('bg-orange-600');
 
-
-  simulateButton = createButton('Visualize');
-  simulateButton.position(20, 110);
-  simulateButton.mousePressed(runSimulationStep);
-
-  simulateButton = createButton('Brute Force');
-  simulateButton.position(20, 170);
-  simulateButton.mousePressed(toggleBrute);
-
-  simulateButton = createButton('Kirk Seidal Algorithm');
-  simulateButton.position(20, 200);
-  simulateButton.mousePressed(toggleKPS);
-
-  simulateButton = createButton('Jarvis Algorithm');
-  simulateButton.position(20, 230);
-  simulateButton.mousePressed(toggleJarvis);
+  if (id === "BruteForce") {
+      toggleBrute();
+  } else if (id === "KPS") {
+      toggleKPS();
+  } else if (id === "Jarvis") {
+      toggleJarvis();
+  }
 }
 
 function toggleBrute() {
@@ -181,7 +210,7 @@ function runBruteStep() {
         }
         stroke(162, 32, 240);
         line(instruction[3].x, instruction[3].y, instruction[4].x, instruction[4].y);
-        stroke(0, 0, 255);
+        stroke(0, 255, 0);
         line(instruction[5].x, instruction[5].y, instruction[5].x, instruction[5].y);
         sendMessage("The current point we are considering (green).");
         stroke(255);
