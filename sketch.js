@@ -12,10 +12,10 @@ let simulation;
 let simulateButton;
 let numberPointsTextBox;
 let numberPoints;
-let defaultPoints = '1000000';
-let TIMEOUT = 1000;
+let defaultPoints = '100';
+let TIMEOUT = 500;
 
-let algo = 0;
+let algo = 1;
 let found = false;
 
 const ALGORITHM = Object.freeze({
@@ -46,6 +46,10 @@ const TYPE = Object.freeze({
   'BF_GET_PAIR': 12,
   'BF_CHECKPOINT': 13,
   'BF_UPDATE_HULL': 14,
+  'BRIDGE_1': 15,
+  'BRIDGE_2': 16,
+  'BRIDGE_3': 17,
+  'BRIDGE_4': 18
 });
 
 
@@ -112,15 +116,15 @@ function setup() {
   createCanvas(WIDTH, HEIGHT).parent(canvasContainer);
   background(0);
   stroke(255);
-  strokeWeight(4);
+  strokeWeight(3);
   container.child(canvasContainer);
 }
 
 function toggleAlgorithm(id) {
   document.querySelectorAll('.algorithm-button').forEach(button => {
-      button.classList.remove('bg-orange-600');
-      button.classList.remove('bg-indigo-600');
-      button.classList.add('bg-indigo-600');
+    button.classList.remove('bg-orange-600');
+    button.classList.remove('bg-indigo-600');
+    button.classList.add('bg-indigo-600');
   });
 
   let button = document.getElementById(id);
@@ -128,11 +132,11 @@ function toggleAlgorithm(id) {
   button.classList.add('bg-orange-600');
 
   if (id === "BruteForce") {
-      toggleBrute();
+    toggleBrute();
   } else if (id === "KPS") {
-      toggleKPS();
+    toggleKPS();
   } else if (id === "Jarvis") {
-      toggleJarvis();
+    toggleJarvis();
   }
 }
 
@@ -165,7 +169,7 @@ function drawPoints(P) {
   }
 }
 function runBruteStep() {
-  if(!found){
+  if (!found) {
     generateBrute(true);
   }
   if (found && simulation && simulation.length > 0) {
@@ -227,7 +231,7 @@ function runBruteStep() {
 }
 
 function runJarvisStep() {
-  if(!found){
+  if (!found) {
     generateJarvis(true);
   }
   if (found && simulation && simulation.length > 0) {
@@ -337,18 +341,17 @@ function runJarvisStep() {
 }
 
 function runKPSStep() {
-  if(!found){
+  if (!found) {
     generateKPS(true);
   }
   if (found && simulation && simulation.length > 0) {
     let instruction = simulation.shift(); // Get the first instruction from the simulation array
-    console.log("====");
-    strokeWeight(4);
+    strokeWeight(3);
     switch (instruction[0]) {
       case TYPE.MEDIAN:
         clearCanvas();
-        stroke(0, 255, 0);
-        // Draw Points
+        // Show points in white
+        stroke(255);
         if (instruction[4][0].x < 0) {
           drawPoints(mirror(instruction[4]));
         } else {
@@ -362,7 +365,7 @@ function runKPSStep() {
           line(instruction[1], 0, instruction[1], WIDTH);
         }
         // Draw k, m
-        strokeWeight(10);
+        strokeWeight(3);
         stroke(0, 255, 255);
         if (instruction[2].x < 0) {
           line(-1 * instruction[2].x, -1 * instruction[2].y, -1 * instruction[2].x, -1 * instruction[2].y);
@@ -371,25 +374,59 @@ function runKPSStep() {
           line(instruction[2].x, instruction[2].y, instruction[2].x, instruction[2].y);
           line(instruction[3].x, instruction[3].y, instruction[3].x, instruction[3].y);
         }
-
-        strokeWeight(4);
+        // Draw Hull in red
+        stroke(255, 0, 0);
+        if (instruction[5].length > 0 && instruction[5][0].x < 0) {
+          let hull = mirror(instruction[5])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[5].length > 0) {
+          let hull = instruction[5];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        }
         // Send Message
         sendMessage("Median (purple) of these points (green). The right-most and left-most points are in cyan.");
         setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.BRIDGE:
-        stroke(255, 0, 0);
+        clearCanvas();
+        // Show points in white
+        stroke(255);
+        if (instruction[4][0].x < 0) {
+          drawPoints(mirror(instruction[4]));
+        } else {
+          drawPoints(instruction[4]);
+        }
+        // Draw Bridge in Green
+        stroke(0, 255, 0);
         if (instruction[5].x < 0) {
           line(-1 * instruction[5].x, -1 * instruction[5].y, -1 * instruction[6].x, -1 * instruction[6].y);
         } else {
           line(instruction[5].x, instruction[5].y, instruction[6].x, instruction[6].y);
+        }
+        // Draw Hull in red
+        stroke(255, 0, 0);
+        if (instruction[7].length > 0 && instruction[7][0].x < 0) {
+          let hull = mirror(instruction[7])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[7].length > 0) {
+          let hull = instruction[7];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
         }
         sendMessage("The Bridge for these points...");
         setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.ELIMINATE_l:
         clearCanvas();
-        // Draw Points
+        // Draw Points in white
+        stroke(255);
         if (instruction[4][0].x < 0) {
           sendMessage("We can eliminate all the points to the left of the right point of Bridge...");
           drawPoints(mirror(instruction[4]));
@@ -397,10 +434,24 @@ function runKPSStep() {
           sendMessage("We can eliminate all the points to the right of the left point of Bridge...");
           drawPoints(instruction[4]);
         }
+        // Draw Hull in red
+        stroke(255, 0, 0);
+        if (instruction[7].length > 0 && instruction[7][0].x < 0) {
+          let hull = mirror(instruction[7])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[7].length > 0) {
+          let hull = instruction[7];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        }
         setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.ELIMINATE_r:
         clearCanvas();
+        stroke(255);
         if (instruction[4][0].x < 0) {
           drawPoints(mirror(instruction[4]));
           sendMessage("We can eliminate all the points to the right of the left point of the Bridge...");
@@ -408,29 +459,351 @@ function runKPSStep() {
           sendMessage("We can eliminate all the points to the left of the right point of the Bridge...");
           drawPoints(instruction[4]);
         }
+        // Draw Hull in red
+        stroke(255, 0, 0);
+        if (instruction[7].length > 0 && instruction[7][0].x < 0) {
+          let hull = mirror(instruction[7])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[7].length > 0) {
+          let hull = instruction[7];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        }
         setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.HULL_1_j:
+        clearCanvas();
         stroke(0, 255, 255);
         if (instruction[6].x < 0) {
           line(-1 * instruction[6].x, -1 * instruction[6].y, -1 * instruction[6].x, -1 * instruction[6].y);
         } else {
           line(instruction[6].x, instruction[6].y, instruction[6].x, instruction[6].y);
         }
+        // Draw hull in red
+        stroke(255, 0, 0);
+        if (instruction[7].length > 0 && instruction[7][0].x < 0) {
+          let hull = mirror(instruction[7])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[7].length > 0) {
+          let hull = instruction[7];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        }
         sendMessage("The right point of the Bridge must belong to the hull as it is equal to the right-most point...");
         setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.HULL_1_k:
+        clearCanvas();
         stroke(0, 255, 255);
         if (instruction[5].x < 0) {
           line(-1 * instruction[5].x, -1 * instruction[5].y, -1 * instruction[5].x, -1 * instruction[5].y);
         } else {
           line(instruction[5].x, instruction[5].y, instruction[5].x, instruction[5].y);
         }
+        // Draw hull in red
+        stroke(255, 0, 0);
+        if (instruction[7].length > 0 && instruction[7][0].x < 0) {
+          let hull = mirror(instruction[7])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[7].length > 0) {
+          let hull = instruction[7];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        }
         sendMessage("The left point of the Bridge must belong to the hull as it is equal to the left-most point...");
         setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.HULL_2:
+        setTimeout(runSimulationStep, TIMEOUT);
+        break;
+      case TYPE.BRIDGE_1:
+        clearCanvas();
+        // Show points in white
+        stroke(255);
+        if (instruction[2][0].x < 0) {
+          drawPoints(mirror(instruction[2]));
+        } else {
+          drawPoints(instruction[2]);
+        }
+        // Draw Hull in red
+        stroke(255, 0, 0);
+        if (instruction[4].length > 0 && instruction[4][0].x < 0) {
+          let hull = mirror(instruction[4])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[4].length > 0) {
+          let hull = instruction[4];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        }
+        // Draw Median
+        stroke(255, 0, 255);
+        if (instruction[1] < 0) {
+          line(-1 * instruction[1], 0, -1 * instruction[1], WIDTH);
+        } else {
+          line(instruction[1], 0, instruction[1], WIDTH);
+        }
+        // Show Pairs
+        stroke(255, 255, 0);
+        for (let pair of instruction[3]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+
+        }
+        sendMessage("All the chosen pairs in this iteration.");
+        setTimeout(runSimulationStep, TIMEOUT);
+        break;
+      case TYPE.BRIDGE_2:
+        clearCanvas();
+        // Show points in white
+        stroke(255);
+        if (instruction[2][0].x < 0) {
+          drawPoints(mirror(instruction[2]));
+        } else {
+          drawPoints(instruction[2]);
+        }
+        // Draw Hull in red
+        stroke(255, 0, 0);
+        if (instruction[4].length > 0 && instruction[4][0].x < 0) {
+          let hull = mirror(instruction[4])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[4].length > 0) {
+          let hull = instruction[4];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        }
+        // Draw Median
+        stroke(255, 0, 255);
+        if (instruction[1] < 0) {
+          line(-1 * instruction[1], 0, -1 * instruction[1], WIDTH);
+        } else {
+          line(instruction[1], 0, instruction[1], WIDTH);
+        }
+        // Show Pairs
+        stroke(255, 255, 0);
+        for (let pair of instruction[3]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        // Show lesser, equal and greater
+        stroke(128, 0, 128);
+        for (let pair of instruction[5]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        stroke(0, 255, 0);
+        for (let pair of instruction[6]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        stroke(0, 0, 255);
+        for (let pair of instruction[7]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        sendMessage("The pairs with slope lesser, equal to and greater than the medium in purple, green, blue");
+        setTimeout(runSimulationStep, TIMEOUT);
+        break;
+      case TYPE.BRIDGE_3:
+        clearCanvas();
+        // Show points in white
+        stroke(255);
+        if (instruction[2][0].x < 0) {
+          drawPoints(mirror(instruction[2]));
+        } else {
+          drawPoints(instruction[2]);
+        }
+        // Draw Hull in red
+        stroke(255, 0, 0);
+        if (instruction[4].length > 0 && instruction[4][0].x < 0) {
+          let hull = mirror(instruction[4])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[4].length > 0) {
+          let hull = instruction[4];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        }
+        // Draw Median
+        stroke(255, 0, 255);
+        if (instruction[1] < 0) {
+          line(-1 * instruction[1], 0, -1 * instruction[1], WIDTH);
+        } else {
+          line(instruction[1], 0, instruction[1], WIDTH);
+        }
+        // Show Pairs
+        stroke(255, 255, 0);
+        for (let pair of instruction[3]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        // Show lesser, equal and greater
+        stroke(128, 0, 128);
+        for (let pair of instruction[5]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        stroke(0, 255, 0);
+        for (let pair of instruction[6]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        stroke(0, 0, 255);
+        for (let pair of instruction[7]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        stroke(255);
+        strokeWeight(10);
+        if (instruction[8].x < 0) {
+          point(-1 * instruction[8].x, -1 * instruction[8].y)
+          point(-1 * instruction[9].x, -1 * instruction[9].y);
+        } else {
+          point(instruction[8].x, instruction[8].y)
+          point(instruction[9].x, instruction[9].y);
+        }
+        strokeWeight(3);
+        sendMessage("The pair with the highest intersection with y axis in white.");
+        setTimeout(runSimulationStep, TIMEOUT);
+        break;
+      case TYPE.BRIDGE_4:
+        clearCanvas();
+        // Show points in white
+        stroke(255);
+        if (instruction[2][0].x < 0) {
+          drawPoints(mirror(instruction[2]));
+        } else {
+          drawPoints(instruction[2]);
+        }
+        // Draw Hull in red
+        stroke(255, 0, 0);
+        if (instruction[4].length > 0 && instruction[4][0].x < 0) {
+          let hull = mirror(instruction[4])
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        } else if (instruction[4].length > 0) {
+          let hull = instruction[4];
+          for (let idx = 0; idx < hull.length - 1; idx++) {
+            line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
+          }
+        }
+        // Draw Median
+        stroke(255, 0, 255);
+        if (instruction[1] < 0) {
+          line(-1 * instruction[1], 0, -1 * instruction[1], WIDTH);
+        } else {
+          line(instruction[1], 0, instruction[1], WIDTH);
+        }
+        // Show Pairs
+        stroke(255, 255, 0);
+        for (let pair of instruction[3]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        // Show lesser, equal and greater
+        stroke(128, 0, 128);
+        for (let pair of instruction[5]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        stroke(0, 255, 0);
+        for (let pair of instruction[6]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        stroke(0, 0, 255);
+        for (let pair of instruction[7]) {
+          if (pair[0].x < 0) {
+            line(-1 * pair[0].x, -1 * pair[0].y, -1 * pair[1].x, -1 * pair[1].y);
+
+          } else {
+            line(pair[0].x, pair[0].y, pair[1].x, pair[1].y);
+          }
+        }
+        stroke(255);
+        strokeWeight(10);
+        if (instruction[8].x < 0) {
+          point(-1 * instruction[8].x, -1 * instruction[8].y)
+          point(-1 * instruction[9].x, -1 * instruction[9].y);
+        } else {
+          point(instruction[8].x, instruction[8].y)
+          point(instruction[9].x, instruction[9].y);
+        }
+        strokeWeight(3);
+        // Draw the candidates
+        strokeWeight(7);
+        stroke(255, 255, 0);
+        if (instruction[10].x < 0) {
+          drawPoints(mirror(instruction[10]));
+        } else {
+          drawPoints(instruction[10]);
+        }
+        stroke(255);
+        strokeWeight(3);
+        sendMessage("The filtered candidates for the bridge function.");
         setTimeout(runSimulationStep, TIMEOUT);
         break;
       default:
@@ -483,7 +856,7 @@ function generateBrute(visualize = false) {
     line(edges[i][0].x, edges[i][0].y, edges[i][1].x, edges[i][1].y);
   }
   initialized = true;
-  if(visualize){
+  if (visualize) {
     found = true;
   }
   sendMessage("Convex hull generated successfully.");
@@ -496,13 +869,13 @@ function generateKPS(visualize = false) {
   simulation = convex.simulation;
   console.log("simulation");
   console.log(convex.simulation);
-  strokeWeight(5);
+  strokeWeight(3);
   stroke(255, 0, 0);
   for (let i = 0; i < hull.length - 1; i++) {
     line(hull[i].x, hull[i].y, hull[i + 1].x, hull[i + 1].y);
   }
   initialized = true;
-  if(visualize){
+  if (visualize) {
     found = true;
   }
   sendMessage("Convex hull generated successfully.");
@@ -520,7 +893,7 @@ function generateJarvis(visualize = false) {
     line(hull[i].x, hull[i].y, hull[i + 1].x, hull[i + 1].y);
   }
   initialized = true;
-  if(visualize){
+  if (visualize) {
     found = true;
   }
   sendMessage("Convex hull generated successfully.");

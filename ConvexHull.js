@@ -133,12 +133,12 @@ class ConvexHull {
 
     connect(k, m, S, visualize) {
         let a = this.findMedian(S).x;
-        if (visualize) this.simulation.push([TYPE.MEDIAN, a, k, m, this.deepClone(S)]);
-        //console.log("Median");
-        //console.log(a);
-        let [pi, pj] = this.bridge(S, a);
-        if (visualize) this.simulation.push([TYPE.BRIDGE, a, k, m, this.deepClone(S), pi, pj]);
-        //console.log("back in connect");
+        if (visualize) this.simulation.push([TYPE.MEDIAN, a, k, m, this.deepClone(S), this.deepClone(this.hull)]);
+        
+        let [pi, pj] = this.bridge(S, a, visualize);
+
+        if (visualize) this.simulation.push([TYPE.BRIDGE, a, k, m, this.deepClone(S), pi, pj, this.deepClone(this.hull)]);
+
         let sLeft = [pi];
         let sRight = [pj];
         for (let point of S) {
@@ -147,25 +147,24 @@ class ConvexHull {
         }
 
         if (pi.equals(k)) {
-            if (visualize) this.simulation.push([TYPE.HULL_1_k, a, k, m, this.deepClone(S), pi, pj]);
             this.hull.push(pi);
+            if (visualize) this.simulation.push([TYPE.HULL_1_k, a, k, m, this.deepClone(S), pi, pj, this.deepClone(this.hull)]);
         } else {
-            if (visualize) this.simulation.push([TYPE.ELIMINATE_l, a, k, m, this.deepClone(sLeft), pi, pj]);
+            if (visualize) this.simulation.push([TYPE.ELIMINATE_l, a, k, m, this.deepClone(sLeft), pi, pj, this.deepClone(this.hull)]);
             this.connect(k, pi, sLeft, visualize);
         }
         if (pj.equals(m)) {
-            if (visualize) this.simulation.push([TYPE.HULL_1_j, a, k, m, this.deepClone(S), pi, pj]);
             this.hull.push(pj)
+            if (visualize) this.simulation.push([TYPE.HULL_1_j, a, k, m, this.deepClone(S), pi, pj, this.deepClone(this.hull)]);
         } else {
-            if (visualize) this.simulation.push([TYPE.ELIMINATE_r, a, k, m, this.deepClone(sRight), pi, pj]);
+            if (visualize) this.simulation.push([TYPE.ELIMINATE_r, a, k, m, this.deepClone(sRight), pi, pj, this.deepClone(this.hull)]);
             this.connect(pj, m, sRight, visualize);
         }
         return;
     }
 
 
-    bridge(S, a) {
-        // strokeWeight(3);
+    bridge(S, a, visualize) {
         // line(a, 0, a, 600);
         if (S.length == 2) {
             if (S[0].x < S[1].x) return [S[0], S[1]];
@@ -201,6 +200,8 @@ class ConvexHull {
             }
         }
 
+        if (visualize) this.simulation.push([TYPE.BRIDGE_1, a, this.deepClone(S), this.deepClone(newPairs), this.deepClone(this.hull)]);
+
         if (newPairs.length === 0) return candidates;
         if (S.length % 2 === 1) candidates.push(S[S.length - 1]);
 
@@ -228,16 +229,10 @@ class ConvexHull {
                 large.push(newPairs[i]);
             }
         }
-        //console.log("K");
-        //console.log(K);
-        //console.log("small");
-        //console.log(small);
-        //console.log("equal");
-        //console.log(equal);
-        //console.log("large");
-        //console.log(large);
-        // Get line having max intersection with y axis passing through our points
+        if (visualize) this.simulation.push([TYPE.BRIDGE_2, a, this.deepClone(S), this.deepClone(newPairs), this.deepClone(this.hull), this.deepClone(small), this.deepClone(equal), this.deepClone(large)]);
 
+        
+        // Get line having max intersection with y axis passing through our points
         let maxValue = -Infinity;
         for (let point of S) {
             let c = point.y - K * point.x;
@@ -255,14 +250,6 @@ class ConvexHull {
             }
         }
 
-        //console.log(MAX);
-        for (let point of MAX) {
-            stroke(0, 255, 0);
-            // line(point.x, point.y, 2 * point.x, K * point.x + point.y);
-            // line(point.x, -1 * point.y, 2 * point.x, K * point.x - point.y);
-            stroke(255);
-        }
-
         let pk = MAX[0];
         let pm = MAX[0];
         for (let point of MAX) {
@@ -273,6 +260,7 @@ class ConvexHull {
         //console.log("pk, pm");
         //console.log(pk);
         //console.log(pm);
+        if (visualize) this.simulation.push([TYPE.BRIDGE_3, a, this.deepClone(S), this.deepClone(newPairs), this.deepClone(this.hull), this.deepClone(small), this.deepClone(equal), this.deepClone(large), pk, pm]);
 
         // Determine if h contains the bridge
         if (pk.x <= a && pm.x > a) {
@@ -314,9 +302,10 @@ class ConvexHull {
                 candidates.push(pair[0]);
             }
         }
+        if (visualize) this.simulation.push([TYPE.BRIDGE_4, a, this.deepClone(S), this.deepClone(newPairs), this.deepClone(this.hull), this.deepClone(small), this.deepClone(equal), this.deepClone(large), pk, pm, candidates]);
         //console.log("candidates1");
         //console.log(candidates);
-        return this.bridge(candidates, a);
+        return this.bridge(candidates, a, visualize);
     }
 
 
