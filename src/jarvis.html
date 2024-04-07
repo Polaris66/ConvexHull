@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis's March Algorithm</title>
+    <style>
+        body {
+            background-color: #131236;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-top: 0;
+        }
+
+        .section p {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h2>Jarvis's March Algorithm</h2>
+            <p>
+                Jarvis's march, also known as the gift wrapping algorithm, is a straightforward method for finding the convex hull of a set of points in a plane. It works by repeatedly selecting the point with the smallest polar angle relative to the current point and adding it to the convex hull.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>How Jarvis's March Algorithm Works</h2>
+            <p><strong>Select Initial Point:</strong> Start by selecting the point with the lowest y-coordinate (or the leftmost point if there are multiple points with the same lowest y-coordinate). This point is guaranteed to be part of the convex hull.</p>
+            <p><strong>Find Next Point:</strong> From the current point, consider all other points in the set. Calculate the polar angle of each point relative to the current point. The polar angle is the angle formed by the line segment connecting the current point and the candidate point with respect to the positive x-axis.</p>
+            <p><strong>Select Smallest Angle:</strong> Choose the point with the smallest polar angle. This point will be added to the convex hull.</p>
+            <p><strong>Repeat:</strong> Set the chosen point as the new current point and repeat steps 2 and 3 until the algorithm reaches the initial point again.</p>
+            <p><strong>Termination:</strong> Once the algorithm returns to the initial point, the convex hull is complete.</p>
+        </div>
+
+        <div class="section">
+            <h2>Complexity and Efficiency</h2>
+            <p>The complexity of Jarvis's march algorithm depends on the number of points in the input set. In the worst case, where all points lie on the convex hull, the algorithm has a time complexity of O(nh), where n is the number of points and h is the number of points on the convex hull. However, in practical scenarios, the complexity is often better than the worst case.</p>
+            <p>Jarvis's march is relatively easy to implement and works well for small or moderately sized point sets. However, it may not be the most efficient algorithm for very large point sets due to its time complexity.</p>
+        </div>
+
+        <div class="section">
+            <h3>Time Complexity    ---    O(nH) </h3>
+            <h3>Space Complexity    ---    O(n)</h3>
+            <h4>n = number of points in convex hull</h4>
+            <h4>H = number of hull points</h4>
+        </div>
+    </div>
+</body>
+</html>

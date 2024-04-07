@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #131236;
+        }
+        h3 {
+            text-align: left;
+            color:white;
+        }
+        h4 {
+            margin-top: 20px;
+            color: white;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h3>Methods</h3>
+    
+    <h4>1. KPS(P)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Computes the convex hull using the Kirkpatrick-Seidel algorithm.<br>
+            <strong>Parameters:</strong> P: Array of points.<br>
+            <strong>Returns:</strong> Array of points representing the vertices of the convex hull.
+        </code>
+    </pre>
+
+    <h4>2. UpperHull(P)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Computes the upper hull of a set of points.<br>
+            <strong>Parameters:</strong> P: Array of points.<br>
+            <strong>Returns:</strong> None
+        </code>
+    </pre>
+
+    <h4>3. connect(k, m, S)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Connects two points on the convex hull.<br>
+            <strong>Parameters:</strong> k, m: Points to connect.<br>
+            <strong>S:</strong> Subset of points.<br>
+            <strong>Returns:</strong> None
+        </code>
+    </pre>
+
+    <h4>4. bridge(S, a)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Finds the bridge in a set of points.<br>
+            <strong>Parameters:</strong> S: Array of points.<br>
+            <strong>a:</strong> Parameter for the bridge calculation.<br>
+            <strong>Returns:</strong> Array containing the two points forming the bridge.
+        </code>
+    </pre>
+
+    <h4>5. slowMedian(S)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Finds the median of a set of points using a slow method.<br>
+            <strong>Parameters:</strong> S: Array of points.<br>
+            <strong>Returns:</strong> Point representing the median.
+        </code>
+    </pre>
+
+    <h4>6. findMedian(S)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Finds the median of a set of points.<br>
+            <strong>Parameters:</strong> S: Array of points.<br>
+            <strong>Returns:</strong> Point representing the median.
+        </code>
+    </pre>
+
+    <h4>7. quickSelect(A, k)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Finds the k-th smallest element in an array.<br>
+            <strong>Parameters:</strong> A: Array of points.<br>
+            <strong>k:</strong> Index of the desired element.<br>
+            <strong>Returns:</strong> The k-th smallest element.
+        </code>
+    </pre>
+
+    <h4>8. medianOfMedians(A)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Finds the median of medians of an array.<br>
+            <strong>Parameters:</strong> A: Array of points.<br>
+            <strong>Returns:</strong> The median of medians.
+        </code>
+    </pre>
+
+    <h4>9. chunked(A, chunk_size)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Divides an array into chunks of a specified size.<br>
+            <strong>Parameters:</strong> A: Array of points.<br>
+            <strong>chunk_size:</strong> Size of each chunk.<br>
+            <strong>Returns:</strong> Array of chunks.
+        </code>
+    </pre>
+
+    <h4>10. deepClone(P)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Creates a deep copy of an array of points.<br>
+            <strong>Parameters:</strong> P: Array of points.<br>
+            <strong>Returns:</strong> Deep copy of the array.
+        </code>
+    </pre>
+
+    <h4>11. mirror(P)</h4>
+    <pre>
+        <code>
+            <strong>Description:</strong> Mirrors a set of points.<br>
+            <strong>Parameters:</strong> P: Array of points.<br>
+            <strong>Returns:</strong> Mirrored set of points.
+        </code>
+    </pre>
+</body>
+</html>

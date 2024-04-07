@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complexity Analysis</title>
+    <style>
+        body{
+            background-color: #131236;
+            color: white;
+        }
+        .container {
+            margin: 0 auto;
+            width: 80%;
+        }
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            border: 2px solid white;
+        }
+        th, td {
+            border: 1px solid white;
+            padding: 8px;
+            text-align: center;
+        }
+        h1{
+            text-align: center;
+            margin-bottom: 80px;
+            font-size: 50px;
+        }
+        .image-container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .image-container img {
+            width: 50%;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+        }
+        .text-container {
+            text-align: center;
+            margin: 30px;
+        }
+        p {
+            font-size: 22px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1>Complexity Analysis</h1>
+
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Algo Name</th>
+                <th scope="col" colspan="2" class="text-center">Time Complexity</th>
+                <th scope="col">Auxiliary Space</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th scope="col">Average Case</th>
+                <th scope="col">Worst Case</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Slow Convex Hull</td>
+                <td class="text-center">O(n<sup>3</sup>)</td>
+                <td class="text-center">O(n<sup>3</sup>)</td>
+                <td>O(n)</td>
+            </tr>
+            <tr>
+                <td>Kirkpatrick–Seidel</td>
+                <td class="text-center">O(nlogH)</td>
+                <td class="text-center">O(nlogH)</td>
+                <td>O(n)</td>
+            </tr>
+            <tr>
+                <td>Jarvis’ Algorithm</td>
+                <td class="text-center">O(nH)</td>
+                <td class="text-center">O(n<sup>2</sup>)</td>
+                <td>O(n)</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="image-container">
+    <img src="../images/graph1.jpeg" alt="Graph 1">
+    <img src="../images/graph2.jpeg" alt="Graph 2">
+</div>
+
+<div class="text-container">
+    <p>
+        We have observed significant efficiency gains with both of the algorithms we've implemented compared to the brute force approach (i.e., Slow Convex Hull). Even for relatively small values of n, the time taken is considerably reduced. However, when comparing the Jarvis and KPS algorithms, the time taken is nearly equivalent for smaller n values, making the choice between them less critical in those cases.
+    </p>
+    <p> 
+        However, as n increases, the superiority of the KPS algorithm becomes evident, with its efficiency outpacing that of the Jarvis algorithm. This trend is clearly illustrated in the graphs we have plotted.
+    </p>
+</div>  
+
+</body>
+</html>
