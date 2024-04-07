@@ -14,7 +14,8 @@ let numberPointsTextBox;
 let numberPoints;
 let defaultPoints = '100';
 let TIMEOUT = 500;
-
+let prevButton;
+let nextButton;
 let algo = 1;
 let found = false;
 
@@ -56,36 +57,28 @@ const TYPE = Object.freeze({
 function setup() {
   let container = createDiv();
   container.class('flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white');
-
   let header = createDiv("Convex Hull Visualizer");
   header.class('text-4xl font-bold mb-8 py-4');
-
   let buttonsContainer = createDiv();
   buttonsContainer.class('flex flex-wrap justify-center mb-8');
-
   let buttonClasses = 'bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mx-2 transition-colors duration-300 mt-10';
   let algobuttonClasses = 'algorithm-button bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg mx-2 transition-colors duration-300 mt-10';
-
   generateButton = createButton('Generate Convex Hull');
   generateButton.class(buttonClasses);
   generateButton.mousePressed(generateConvexHull);
   buttonsContainer.child(generateButton);
-
   randomlyInitializeButton = createButton('Randomly Initialize Points');
   randomlyInitializeButton.class(buttonClasses);
   randomlyInitializeButton.mousePressed(generatePoints);
   buttonsContainer.child(randomlyInitializeButton);
-
   clearButton = createButton('Clear Canvas');
   clearButton.class(buttonClasses);
   clearButton.mousePressed(clearCanvas);
   buttonsContainer.child(clearButton);
-
   simulateButton = createButton('Visualize');
   simulateButton.class(buttonClasses);
   simulateButton.mousePressed(runSimulationStep);
   buttonsContainer.child(simulateButton);
-
   let algorithmButtons = [['Brute Force', 'BruteForce'], ['Kirk Seidal Algorithm', 'KPS'], ['Jarvis Algorithm', 'Jarvis']];
   algorithmButtons.forEach(algorithm => {
     let algorithmButton = createButton(algorithm[0]);
@@ -94,9 +87,21 @@ function setup() {
     algorithmButton.mousePressed(() => toggleAlgorithm(algorithm[1]));
     buttonsContainer.child(algorithmButton);
   });
-
   container.child(header);
   container.child(buttonsContainer);
+
+  // Add the previous and next buttons on the same line
+  let navigateContainer = createDiv();
+  navigateContainer.class('flex justify-center mb-4');
+  prevButton = createButton('Previous Step');
+  prevButton.class(buttonClasses);
+  prevButton.mousePressed(previousStep);
+  navigateContainer.child(prevButton);
+  nextButton = createButton('Next Step');
+  nextButton.class(buttonClasses);
+  nextButton.mousePressed(nextStep);
+  navigateContainer.child(nextButton);
+  container.child(navigateContainer);
 
   let numberPointsTextBox = createInput(defaultPoints);
   numberPointsTextBox.class('bg-gray-200 text-gray-700 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-600');
@@ -120,7 +125,25 @@ function setup() {
   container.child(canvasContainer);
 }
 
+
+function previousStep() {
+  if (simIdx > 0) {
+    simIdx--;
+    clearCanvas();
+    runSimulationStep();
+  }
+}
+
+function nextStep() {
+  if (simulation && simIdx < simulation.length - 1) {
+    simIdx++;
+    clearCanvas();
+    runSimulationStep();
+  }
+}
+
 function toggleAlgorithm(id) {
+  simIdx = 0;
   document.querySelectorAll('.algorithm-button').forEach(button => {
     button.classList.remove('bg-orange-600');
     button.classList.remove('bg-indigo-600');
@@ -173,7 +196,7 @@ function runBruteStep() {
     generateBrute(true);
   }
   if (found && simulation && simulation.length > 0) {
-    let instruction = simulation.shift();
+    let instruction = simulation[simIdx];
     strokeWeight(4);
     clearCanvas();
     stroke(255);
@@ -205,7 +228,7 @@ function runBruteStep() {
         }
         sendMessage("We add this pair to the hull.");
         stroke(255);
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.BF_CHECKPOINT:
         console.log("in Update...");
@@ -221,7 +244,7 @@ function runBruteStep() {
         line(instruction[5].x, instruction[5].y, instruction[5].x, instruction[5].y);
         sendMessage("The current point we are considering (green).");
         stroke(255);
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       default:
         sendMessage("Simulation ended or not initialized.");
@@ -235,8 +258,9 @@ function runJarvisStep() {
     generateJarvis(true);
   }
   if (found && simulation && simulation.length > 0) {
-    let instruction = simulation.shift(); // Get the first instruction from the simulation array
-    console.log("====");
+    let instruction = simulation[simIdx]; // Get the first instruction from the simulation array
+    console.log("simIdx, instruction");
+    console.log(simIdx, instruction);
     strokeWeight(4);
     clearCanvas();
     stroke(255);
@@ -247,7 +271,7 @@ function runJarvisStep() {
         drawPoints([instruction[2]]);
         sendMessage("We start with the left-most point of the set (Green). This is now our current point. Also, note that this point must belong to the Hull.");
         stroke(255);
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.J_ACCEPTORIENTATION:
         stroke(255);
@@ -268,7 +292,7 @@ function runJarvisStep() {
           line(instruction[1][idx].x, instruction[1][idx].y, instruction[1][idx + 1].x, instruction[1][idx + 1].y);
         }
         stroke(255, 255, 255);
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.J_REJECTORIENTATION:
         stroke(255);
@@ -289,7 +313,7 @@ function runJarvisStep() {
           line(instruction[1][idx].x, instruction[1][idx].y, instruction[1][idx + 1].x, instruction[1][idx + 1].y);
         }
         stroke(255, 255, 255);
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.J_UPDATE_HULL:
         stroke(255);
@@ -310,7 +334,7 @@ function runJarvisStep() {
           line(instruction[1][idx].x, instruction[1][idx].y, instruction[1][idx + 1].x, instruction[1][idx + 1].y);
         }
         stroke(255, 255, 255);
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.J_CHOOSEQ:
         stroke(255);
@@ -331,7 +355,7 @@ function runJarvisStep() {
           line(instruction[1][idx].x, instruction[1][idx].y, instruction[1][idx + 1].x, instruction[1][idx + 1].y);
         }
         stroke(255, 255, 255);
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       default:
         sendMessage("Simulation ended or not initialized.");
@@ -345,7 +369,7 @@ function runKPSStep() {
     generateKPS(true);
   }
   if (found && simulation && simulation.length > 0) {
-    let instruction = simulation.shift(); // Get the first instruction from the simulation array
+    let instruction = simulation[simIdx]; // Get the first instruction from the simulation array
     strokeWeight(3);
     switch (instruction[0]) {
       case TYPE.MEDIAN:
@@ -389,7 +413,7 @@ function runKPSStep() {
         }
         // Send Message
         sendMessage("Median (purple) of these points (green). The right-most and left-most points are in cyan.");
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.BRIDGE:
         clearCanvas();
@@ -421,7 +445,7 @@ function runKPSStep() {
           }
         }
         sendMessage("The Bridge for these points...");
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.ELIMINATE_l:
         clearCanvas();
@@ -447,7 +471,7 @@ function runKPSStep() {
             line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
           }
         }
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.ELIMINATE_r:
         clearCanvas();
@@ -472,7 +496,7 @@ function runKPSStep() {
             line(hull[idx].x, hull[idx].y, hull[idx + 1].x, hull[idx + 1].y);
           }
         }
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.HULL_1_j:
         clearCanvas();
@@ -496,7 +520,7 @@ function runKPSStep() {
           }
         }
         sendMessage("The right point of the Bridge must belong to the hull as it is equal to the right-most point...");
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.HULL_1_k:
         clearCanvas();
@@ -520,10 +544,10 @@ function runKPSStep() {
           }
         }
         sendMessage("The left point of the Bridge must belong to the hull as it is equal to the left-most point...");
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.HULL_2:
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.BRIDGE_1:
         clearCanvas();
@@ -565,7 +589,7 @@ function runKPSStep() {
 
         }
         sendMessage("All the chosen pairs in this iteration.");
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.BRIDGE_2:
         clearCanvas();
@@ -634,7 +658,7 @@ function runKPSStep() {
           }
         }
         sendMessage("The pairs with slope lesser, equal to and greater than the medium in purple, green, blue");
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.BRIDGE_3:
         clearCanvas();
@@ -713,8 +737,8 @@ function runKPSStep() {
           point(instruction[9].x, instruction[9].y);
         }
         strokeWeight(3);
-        sendMessage("The pair with the highest intersection with y axis in white.");
-        setTimeout(runSimulationStep, TIMEOUT);
+        sendMessage("The point(s) with the highest intersection with y axis in white.");
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       case TYPE.BRIDGE_4:
         clearCanvas();
@@ -804,7 +828,7 @@ function runKPSStep() {
         stroke(255);
         strokeWeight(3);
         sendMessage("The filtered candidates for the bridge function.");
-        setTimeout(runSimulationStep, TIMEOUT);
+        // setTimeout(runSimulationStep, TIMEOUT);
         break;
       default:
         sendMessage("Simulation ended or not initialized.");
@@ -818,11 +842,9 @@ function runKPSStep() {
 function runSimulationStep() {
   if (algo == ALGORITHM.BRUTE) {
     runBruteStep();
-  }
-  else if (algo == ALGORITHM.KPS) {
+  } else if (algo == ALGORITHM.KPS) {
     runKPSStep();
-  }
-  else if (algo == ALGORITHM.JARVIS) {
+  } else if (algo == ALGORITHM.JARVIS) {
     runJarvisStep();
   }
 }
@@ -904,11 +926,11 @@ function clearCanvas() {
   points = [];
   stroke(255, 255, 255);
   initialized = false;
-  simIdx = 0;
 }
 
 function generatePoints() {
   clearCanvas();
+  simIdx = 0;
   randomlyInitialize = true;
   points = [];
   let w = WIDTH;
@@ -917,9 +939,6 @@ function generatePoints() {
   for (let i = 0; i < NUM; i++) {
     points.push(createVector(w / 8 + random() * (3 * w / 4), h / 8 + random() * (3 * h / 4)));
   }
-  // points.push(createVector(176.29774904394873, 413.7634967776654));
-  // points.push(createVector(389.70764196174673, 353.7124942814699))
-  // points.push(createVector(247.00453644173467, 385.06199091236857))
   drawPoints(points)
   initialized = true;
   found = false;
